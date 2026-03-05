@@ -1,20 +1,24 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-
 const connectDB = require("./src/config/db");
+const filiereRoutes = require("./src/routes/filiereRoutes");
+const moduleRoutes = require("./src/routes/moduleRoutes");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-app.get("/api/health", (req, res) =>
-{
+// Routes Dev A
+app.use("/api/filieres", filiereRoutes);
+app.use("/api/modules", moduleRoutes);
+
+app.get("/api/health", (req, res) => {
     res.json({ ok: true, message: "Backend is running" });
 });
 
-connectDB().catch((err) =>
-{
+connectDB().catch((err) => {
     console.error("❌ DB connection error:", err.message);
     process.exit(1);
 });

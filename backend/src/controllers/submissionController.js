@@ -1,0 +1,118 @@
+const Submission = require("../models/Submission");
+
+// GET /api/submissions/:id  (protégé)
+const getSubmissionById = async (req, res) =>
+{
+    try
+    {
+        const userId = req.user?.id;
+        const role = req.user?.role;
+
+        if (!userId)
+        {
+            return res.status(401).json({ message: "Non autorisée" });
+        }
+        if (role !== "student")
+        {
+            return res.status(403).json({ message: "Accès réservé aux étudiants" });
+        }
+
+        const submission = await Submission.findById(req.params.id);
+        if (!submission)
+        {
+            return res.status(404).json({ message: "Soumission non trouvée" });
+        }
+
+        // Un étudiant ne peut lire que ses submissions
+        if (submission.userId.toString() !== userId)
+        {
+            return res.status(403).json({ message: "Accès interdit" });
+        }
+
+        res.status(200).json(submission);
+    } catch (error)
+    {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};
+
+// POST /api/submissions  (protégé)
+const createSubmission = async (req, res) =>
+{
+    try
+    {
+        const userId = req.user?.id;
+        const role = req.user?.role;
+
+        if (!userId)
+        {
+            return res.status(401).json({ message: "Non autorisée" });
+        }
+        if (role !== "student")
+        {
+            return res.status(403).json({ message: "Accès réservé aux étudiants" });
+        }
+
+        const { filiereId, semestre, niveau, difficultes, objectifs } = req.body;
+
+        if (!filiereId || !semestre)
+        {
+            return res.status(400).json({ message: "filiereId et semestre sont requis" });
+        }
+
+        if (!Array.isArray(difficultes) || difficultes.length === 0)
+        {
+            return res.status(400).json({ message: "difficultes doit être une liste non vide" });
+        }
+
+        if (!Array.isArray(objectifs) || objectifs.length === 0)
+        {
+            return res.status(400).json({ message: "objectifs doit être une liste non vide" });
+        }
+
+        const submission = await Submission.create({
+            userId,
+            filiereId,
+            semestre,
+            niveau: niveau || "",
+            difficultes,
+            objectifs,
+        });
+
+        res.status(201).json(submission);
+    } catch (error)
+    {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};
+
+// GET /api/submissions/me  (protégé) - historique des submissions de l’étudiant connecté
+const getMySubmissions = async (req, res) =>
+{
+    try
+    {
+        const userId = req.user?.id;
+        const role = req.user?.role;
+
+        if (!userId)
+        {
+            return res.status(401).json({ message: "Non autorisée" });
+        }
+        if (role !== "student")
+        {
+            return res.status(403).json({ message: "Accès réservé aux étudiants" });
+        }
+
+        const submissions = await Submission.find({ userId }).sort({ createdAt: -1 });
+        res.status(200).json(submissions);
+    } catch (error)
+    {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};
+
+module.exports = {
+    getSubmissionById,
+    createSubmission,
+    getMySubmissions,
+};

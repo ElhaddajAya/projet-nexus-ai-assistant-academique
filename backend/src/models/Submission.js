@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const submissionSchema = new mongoose.Schema(
     {
         // ID de l’étudiant connecté (obligatoire)
-        studentId: {
+        userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Student",
+            ref: "User",
             required: true,
         },
 

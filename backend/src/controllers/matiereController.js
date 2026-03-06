@@ -23,7 +23,10 @@ const getMatiereById = async (req, res) =>
     try
     {
         const matiere = await Matiere.findById(req.params.id);
-        if (!matiere) return res.status(404).json({ message: "Matière non trouvée" });
+        if (!matiere)
+        {
+            return res.status(404).json({ message: "Matière non trouvée" });
+        }
         res.status(200).json(matiere);
     } catch (error)
     {
@@ -36,14 +39,19 @@ const createMatiere = async (req, res) =>
 {
     try
     {
-        const { nom_matiere, moduleId } = req.body;
+        const { nom_matiere, moduleId, difficultes } = req.body;
 
         if (!nom_matiere || !moduleId)
         {
             return res.status(400).json({ message: "nom_matiere et moduleId sont requis" });
         }
 
-        const matiere = await Matiere.create({ nom_matiere, moduleId });
+        const matiere = await Matiere.create({
+            nom_matiere,
+            moduleId,
+            difficultes: difficultes || []
+        });
+
         res.status(201).json(matiere);
     } catch (error)
     {
@@ -56,11 +64,26 @@ const updateMatiere = async (req, res) =>
 {
     try
     {
-        const matiere = await Matiere.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true,
-        });
-        if (!matiere) return res.status(404).json({ message: "Matière non trouvée" });
+        const { nom_matiere, moduleId, difficultes } = req.body;
+
+        const matiere = await Matiere.findByIdAndUpdate(
+            req.params.id,
+            {
+                nom_matiere,
+                moduleId,
+                difficultes
+            },
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+
+        if (!matiere)
+        {
+            return res.status(404).json({ message: "Matière non trouvée" });
+        }
+
         res.status(200).json(matiere);
     } catch (error)
     {
@@ -74,7 +97,10 @@ const deleteMatiere = async (req, res) =>
     try
     {
         const matiere = await Matiere.findByIdAndDelete(req.params.id);
-        if (!matiere) return res.status(404).json({ message: "Matière non trouvée" });
+        if (!matiere)
+        {
+            return res.status(404).json({ message: "Matière non trouvée" });
+        }
         res.status(200).json({ message: "Matière supprimée avec succès" });
     } catch (error)
     {

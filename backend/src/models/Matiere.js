@@ -4,6 +4,8 @@ const matiereSchema = new mongoose.Schema(
     {
         nom_matiere: { type: String, required: true, trim: true },
 
+        difficultes: [{ type: String }],
+
         moduleId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Module",

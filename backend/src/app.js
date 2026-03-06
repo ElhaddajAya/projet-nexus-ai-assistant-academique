@@ -7,6 +7,7 @@ const matiereRoutes = require("./routes/matiereRoutes");
 const filiereRoutes = require("./routes/filiereRoutes");
 const ressourceRoutes = require("./routes/ressourceRoutes");
 const submissionRoutes = require("./routes/submissionRoutes");
+const recommendationRoutes = require("./routes/recommendationRoutes"); 
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use("/api/matieres", matiereRoutes);
 app.use("/api/filieres", filiereRoutes);
 app.use("/api/ressources", ressourceRoutes);
 app.use("/api/submissions", submissionRoutes);
+app.use("/api/recommendations", recommendationRoutes);
 
 // middleware 404
 app.use((req, res) =>

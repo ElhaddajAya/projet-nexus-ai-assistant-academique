@@ -8,10 +8,9 @@ const moduleSchema = new mongoose.Schema(
       trim: true,
     },
     semestre: {
-      type: Number,
+      type: String,
       required: [true, "Le semestre est obligatoire"],
-      min: 1,
-      max: 6,
+      trim: true,
     },
     id_filiere: {
       type: mongoose.Schema.Types.ObjectId,

@@ -2,30 +2,31 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const generateRecommendation = async ({ filiere, semestre, niveau, difficultes, objectifs, ressources }) => {
+const generateRecommendation = async ({ filiere, semestre, niveau, difficultes, objectifs, ressources }) =>
+{
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = `
-Tu es un assistant académique intelligent pour des étudiants de l'EMSI.
+  Tu es un assistant académique intelligent pour des étudiants de l'EMSI.
 
-Voici le profil de l'étudiant :
-- Filière : ${filiere}
-- Semestre : ${semestre}
-- Niveau : ${niveau || "non précisé"}
-- Difficultés : ${difficultes.join(", ")}
-- Objectifs : ${objectifs.join(", ")}
+  Voici le profil de l'étudiant :
+  - Filière : ${filiere}
+  - Semestre : ${semestre}
+  - Niveau : ${niveau || "non précisé"}
+  - Difficultés : ${difficultes.join(", ")}
+  - Objectifs : ${objectifs.join(", ")}
 
-Ressources disponibles dans notre base de données :
-${ressources.map(r => `- ${r.titre} (${r.type}) : ${r.lien}`).join("\n")}
+  Ressources disponibles dans notre base de données :
+  ${ressources.map(r => `- ${r.titre} (${r.type}) : ${r.lien}`).join("\n")}
 
-Génère une réponse JSON avec exactement cette structure :
-{
-  "plan_travail": "un plan de travail détaillé semaine par semaine",
-  "conseils_ia": "des conseils personnalisés pour cet étudiant",
-  "ressources_recommandees": ["lien1", "lien2"]
-}
+  Génère une réponse JSON avec exactement cette structure :
+  {
+    "plan_travail": "un plan de travail détaillé semaine par semaine",
+    "conseils_ia": "des conseils personnalisés pour cet étudiant",
+    "ressources_recommandees": ["lien1", "lien2", ...] uniquement les liens des ressources recommandées
+  }
 
-Réponds UNIQUEMENT avec le JSON, sans texte avant ou après.
+  Réponds UNIQUEMENT avec le JSON, sans texte avant ou après.
   `;
 
   const result = await model.generateContent(prompt);

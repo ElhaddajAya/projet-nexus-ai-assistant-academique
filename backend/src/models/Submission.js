@@ -15,6 +15,18 @@ const submissionSchema = new mongoose.Schema(
             required: true,
         },
 
+        moduleId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Module",
+            required: true,
+        },
+
+        matiereId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Matiere",
+            required: true,
+        },
+
         semestre: { type: String, required: true, trim: true },
 
         niveau: { type: String, default: "" }, // optionnel

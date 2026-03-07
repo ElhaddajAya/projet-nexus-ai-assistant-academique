@@ -40,21 +40,15 @@ const createRessource = async (req, res) =>
 {
     try
     {
-        const { titre, description, lien, type, matiereId } = req.body;
+        const { titre, description, lien, type, matiereId, filiereId, niveau } = req.body;
 
-        if (!titre || !lien || !type || !matiereId)
+        if (!titre || !lien || !type || !matiereId || !filiereId)
         {
-            return res.status(400).json({
-                message: "Les champs titre, lien, type et matiereId sont requis",
-            });
+            return res.status(400).json({ message: "titre, lien, type, matiereId et filiereId sont requis" });
         }
 
         const ressource = await Ressource.create({
-            titre,
-            description: description || "",
-            lien,
-            type,
-            matiereId,
+            titre, description: description || "", lien, type, matiereId, filiereId, niveau: niveau || ""
         });
 
         res.status(201).json(ressource);

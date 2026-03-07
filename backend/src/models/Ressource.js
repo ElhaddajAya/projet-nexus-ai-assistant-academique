@@ -7,6 +7,14 @@ const ressourceSchema = new mongoose.Schema(
         lien: { type: String, required: true },
         type: { type: String, required: true },
 
+        filiereId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Filiere",
+            required: true
+        },
+
+        niveau: { type: String, default: "" },
+
         matiereId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Matiere",

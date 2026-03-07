@@ -8,6 +8,13 @@ const filiereSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+
+    code_filiere: {
+      type: String,
+      required: [true, "Le code de la filière est obligatoire"],
+      unique: true,
+      trim: true,
+    },
   },
   { timestamps: true }
 );

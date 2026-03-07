@@ -53,11 +53,17 @@ const createSubmission = async (req, res) =>
             return res.status(403).json({ message: "Accès réservé aux étudiants" });
         }
 
-        const { filiereId, semestre, niveau, difficultes, objectifs } = req.body;
+        const { filiereId, moduleId, matiereId, semestre, niveau, difficultes, objectifs } = req.body;
 
         if (!filiereId || !semestre)
         {
             return res.status(400).json({ message: "filiereId et semestre sont requis" });
+        }
+
+        // Ajouter la validation
+        if (!moduleId || !matiereId)
+        {
+            return res.status(400).json({ message: "moduleId et matiereId sont requis" });
         }
 
         if (!Array.isArray(difficultes) || difficultes.length === 0)
@@ -73,6 +79,8 @@ const createSubmission = async (req, res) =>
         const submission = await Submission.create({
             userId,
             filiereId,
+            moduleId,
+            matiereId,
             semestre,
             niveau: niveau || "",
             difficultes,

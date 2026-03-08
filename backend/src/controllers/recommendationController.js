@@ -3,23 +3,31 @@ const Submission = require("../models/Submission");
 const Filiere = require("../models/Filiere");
 const Ressource = require("../models/Ressource");
 const Matiere = require("../models/Matiere");
-const { generateRecommendation } = require("../services/geminiService");
+// const { generateRecommendation } = require("../services/geminiService");
+const { generateRecommendation } = require("../services/groqService");
+
 
 // POST /api/recommendations/generate
-const generate = async (req, res) => {
-  try {
+const generate = async (req, res) =>
+{
+  try
+  {
     const userId = req.user?.id;
     const { submissionId } = req.body;
 
-    if (!submissionId) {
+    if (!submissionId)
+    {
       return res.status(400).json({ message: "submissionId est requis" });
     }
 
     // 1. Récupérer la submission
     const submission = await Submission.findById(submissionId)
-      .populate("filiereId", "nom_filiere");
+      .populate("filiereId", "nom_filiere")
+      .populate("moduleId", "nom_module")
+      .populate("matiereId", "nom_matiere");
 
-    if (!submission) {
+    if (!submission)
+    {
       return res.status(404).json({ message: "Submission non trouvée" });
     }
 
@@ -33,9 +41,11 @@ const generate = async (req, res) => {
     const matiereIds = matieresFiltrees.map(m => m._id);
     const ressources = await Ressource.find({ matiereId: { $in: matiereIds } });
 
-    // 3. Appeler Gemini
+    // 3. Appeler Grok
     const result = await generateRecommendation({
       filiere: submission.filiereId.nom_filiere,
+      module: submission.moduleId?.nom_module,
+      matiere: submission.matiereId?.nom_matiere,
       semestre: submission.semestre,
       niveau: submission.niveau,
       difficultes: submission.difficultes,
@@ -47,30 +57,36 @@ const generate = async (req, res) => {
     const recommendation = await Recommendation.create({
       submissionId,
       userId,
+      analyse: result.analyse,
       plan_travail: result.plan_travail,
       conseils_ia: result.conseils_ia,
       ressources_recommandees: result.ressources_recommandees,
     });
 
     res.status(201).json(recommendation);
-  } catch (error) {
+  } catch (error)
+  {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
 
 // GET /api/recommendations/:submissionId
-const getBySubmission = async (req, res) => {
-  try {
+const getBySubmission = async (req, res) =>
+{
+  try
+  {
     const recommendation = await Recommendation.findOne({
       submissionId: req.params.submissionId,
     });
 
-    if (!recommendation) {
+    if (!recommendation)
+    {
       return res.status(404).json({ message: "Recommandation non trouvée" });
     }
 
     res.status(200).json(recommendation);
-  } catch (error) {
+  } catch (error)
+  {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };

@@ -1,36 +1,39 @@
 const mongoose = require("mongoose");
 
-const recommendationSchema = new mongoose.Schema(
-  {
-    submissionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Submission",
-      required: true,
-    },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    plan_travail: {
-      type: String,
-      required: true,
-    },
-    conseils_ia: {
-      type: String,
-      required: true,
-    },
-    ressources_recommandees: [
-      {
-        type: String,
-      },
-    ],
-    date_generation: {
-      type: Date,
-      default: Date.now,
-    },
+const recommendationSchema = new mongoose.Schema({
+  submissionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Submission",
+    required: true,
   },
-  { timestamps: true }
-);
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+
+  // Analyse globale du profil étudiant
+  analyse: { type: String, required: true },
+
+  // Plan semaine par semaine — array d'objets
+  plan_travail: [{
+    step: { type: Number },
+    titre: { type: String },
+    duree: { type: String },
+    desc: { type: String },
+  }],
+
+  // Conseils — array de strings
+  conseils_ia: [{ type: String }],
+
+  // Ressources recommandées — array d'objets
+  ressources_recommandees: [{
+    titre: { type: String },
+    lien: { type: String },
+    type: { type: String },
+  }],
+
+  date_generation: { type: Date, default: Date.now },
+}, { timestamps: true });
 
 module.exports = mongoose.model("Recommendation", recommendationSchema);

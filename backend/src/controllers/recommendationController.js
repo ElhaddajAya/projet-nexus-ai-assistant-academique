@@ -4,7 +4,7 @@ const Filiere = require("../models/Filiere");
 const Ressource = require("../models/Ressource");
 const Matiere = require("../models/Matiere");
 // const { generateRecommendation } = require("../services/geminiService");
-const { generateRecommendation } = require("../services/groqService");
+const { generateRecommendation, askFollowUp } = require("../services/groqService");
 
 
 // POST /api/recommendations/generate
@@ -91,4 +91,45 @@ const getBySubmission = async (req, res) =>
   }
 };
 
-module.exports = { generate, getBySubmission };
+// POST /api/recommendations/ask
+const ask = async (req, res) =>
+{
+  try
+  {
+    const userId = req.user?.id;
+    const { submissionId, question } = req.body;
+
+    if (!submissionId || !question)
+    {
+      return res.status(400).json({ message: "submissionId et question sont requis" });
+    }
+
+    // 1. Récupérer la recommendation existante
+    const recommendation = await Recommendation.findOne({ submissionId });
+    if (!recommendation)
+    {
+      return res.status(404).json({ message: "Recommandation non trouvée" });
+    }
+
+    // 2. Récupérer la submission avec populate pour le contexte
+    const submission = await Submission.findById(submissionId)
+      .populate("filiereId", "nom_filiere")
+      .populate("matiereId", "nom_matiere");
+
+    if (!submission)
+    {
+      return res.status(404).json({ message: "Submission non trouvée" });
+    }
+
+    // 3. Appeler Groq avec le contexte complet
+    const answer = await askFollowUp({ question, recommendation, submission });
+
+    res.status(200).json({ answer });
+
+  } catch (error)
+  {
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
+
+module.exports = { generate, getBySubmission, ask };

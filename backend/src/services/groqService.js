@@ -3,12 +3,12 @@ const Groq = require("groq-sdk");
 // Initialiser le client Groq
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+// Fonction pour générer la recommandation
 const generateRecommendation = async ({
     filiere, semestre, niveau, difficultes,
     objectifs, ressources, module, matiere
 }) =>
 {
-
     // Préparer la liste des ressources pour le prompt
     const ressourcesText = ressources.length > 0
         ? ressources.map(r => `• [${r.type.toUpperCase()}] ${r.titre} → ${r.lien}`).join("\n")
@@ -104,4 +104,47 @@ const generateRecommendation = async ({
     return JSON.parse(clean);
 };
 
-module.exports = { generateRecommendation };
+// Fonction pour répondre à une question de suivi
+const askFollowUp = async ({ question, recommendation, submission }) =>
+{
+
+    const systemPrompt = `Tu es OrientAI, un assistant académique pour les étudiants de l'EMSI.
+    Tu réponds UNIQUEMENT aux questions liées au profil académique de l'étudiant, 
+    à son plan d'apprentissage, ses ressources, ou sa matière.
+    Si la question est hors sujet, réponds poliment que tu ne peux répondre 
+    qu'aux questions académiques liées à son profil.
+    Tu réponds en français, de façon claire et encourageante.
+    Tes réponses sont courtes : 3 à 5 phrases maximum.`;
+
+    const userPrompt = `Contexte de l'étudiant :
+    - Filière  : ${submission.filiereId?.nom_filiere || "non précisé"}
+    - Matière  : ${submission.matiereId?.nom_matiere || "non précisé"}
+    - Difficultés : ${submission.difficultes?.join(", ")}
+    - Objectifs   : ${submission.objectifs?.join(", ")}
+
+    Analyse générée : ${recommendation.analyse}
+
+    Plan d'apprentissage :
+    ${recommendation.plan_travail.map(p => `Étape ${p.step} — ${p.titre} (${p.duree}) : ${p.desc}`).join("\n")}
+
+    Ressources recommandées :
+    ${recommendation.ressources_recommandees.map(r => `• ${r.titre} → ${r.lien}`).join("\n")}
+
+    Question de l'étudiant : "${question}"
+
+    Réponds directement à sa question en te basant sur son profil et son plan.`;
+
+    const response = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+        ],
+        temperature: 0.5,
+        max_tokens: 400, // réponse courte
+    });
+
+    return response.choices[0].message.content;
+};
+
+module.exports = { generateRecommendation, askFollowUp };

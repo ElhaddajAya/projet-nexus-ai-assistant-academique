@@ -5,7 +5,7 @@ const ressourceSchema = new mongoose.Schema(
         titre: { type: String, required: true },
         description: { type: String },
         lien: { type: String, required: true },
-        type: { type: String, required: true },
+        type: { type: String, required: true }, // ex: "video", "TP/TD", "document"
 
         filiereId: {
             type: mongoose.Schema.Types.ObjectId,

@@ -1,9 +1,7 @@
 const Recommendation = require("../models/Recommendation");
 const Submission = require("../models/Submission");
-const Filiere = require("../models/Filiere");
 const Ressource = require("../models/Ressource");
 const Matiere = require("../models/Matiere");
-// const { generateRecommendation } = require("../services/geminiService");
 const { generateRecommendation, askFollowUp } = require("../services/groqService");
 
 
@@ -20,7 +18,7 @@ const generate = async (req, res) =>
       return res.status(400).json({ message: "submissionId est requis" });
     }
 
-    // 1. Récupérer la submission
+    // 1. Récupérer la submission avec populate complet
     const submission = await Submission.findById(submissionId)
       .populate("filiereId", "nom_filiere")
       .populate("moduleId", "nom_module")
@@ -31,7 +29,15 @@ const generate = async (req, res) =>
       return res.status(404).json({ message: "Submission non trouvée" });
     }
 
-    // 2. Récupérer les ressources liées aux matières des modules de la filière
+    // Vérifier que les champs requis sont bien populés
+    if (!submission.filiereId || !submission.moduleId || !submission.matiereId)
+    {
+      return res.status(400).json({
+        message: "Submission incomplète : filiereId, moduleId et matiereId sont requis",
+      });
+    }
+
+    // 2. Récupérer les ressources liées aux matières du module de la filière
     const matieres = await Matiere.find({}).populate({
       path: "moduleId",
       match: { id_filiere: submission.filiereId._id },
@@ -41,7 +47,7 @@ const generate = async (req, res) =>
     const matiereIds = matieresFiltrees.map(m => m._id);
     const ressources = await Ressource.find({ matiereId: { $in: matiereIds } });
 
-    // 3. Appeler Grok
+    // 3. Appeler Groq pour générer la recommandation
     const result = await generateRecommendation({
       filiere: submission.filiereId.nom_filiere,
       module: submission.moduleId?.nom_module,
@@ -53,7 +59,7 @@ const generate = async (req, res) =>
       ressources,
     });
 
-    // 4. Sauvegarder la recommandation
+    // 4. Sauvegarder la recommandation avec chat_history vide au départ
     const recommendation = await Recommendation.create({
       submissionId,
       userId,
@@ -61,6 +67,7 @@ const generate = async (req, res) =>
       plan_travail: result.plan_travail,
       conseils_ia: result.conseils_ia,
       ressources_recommandees: result.ressources_recommandees,
+      chat_history: [], // historique vide au départ
     });
 
     res.status(201).json(recommendation);
@@ -69,6 +76,7 @@ const generate = async (req, res) =>
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+
 
 // GET /api/recommendations/:submissionId
 const getBySubmission = async (req, res) =>
@@ -91,12 +99,12 @@ const getBySubmission = async (req, res) =>
   }
 };
 
+
 // POST /api/recommendations/ask
 const ask = async (req, res) =>
 {
   try
   {
-    const userId = req.user?.id;
     const { submissionId, question } = req.body;
 
     if (!submissionId || !question)
@@ -124,6 +132,22 @@ const ask = async (req, res) =>
     // 3. Appeler Groq avec le contexte complet
     const answer = await askFollowUp({ question, recommendation, submission });
 
+    // 4. Sauvegarder les deux messages (user + ai) dans chat_history
+    await Recommendation.findOneAndUpdate(
+      { submissionId },
+      {
+        $push: {
+          chat_history: {
+            $each: [
+              { role: "user", message: question },
+              { role: "ai", message: answer },
+            ],
+          },
+        },
+      }
+    );
+
+    // 5. Retourner la réponse au frontend
     res.status(200).json({ answer });
 
   } catch (error)
@@ -131,5 +155,6 @@ const ask = async (req, res) =>
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+
 
 module.exports = { generate, getBySubmission, ask };

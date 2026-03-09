@@ -117,7 +117,7 @@ export default function StudentLayout() {
       <aside className='w-[220px] min-h-screen border-r border-[#e8e8e8] flex flex-col py-5 fixed inset-y-0 left-0 bg-white z-10'>
         {/* Logo */}
         <div className='flex items-center gap-2.5 px-4 pb-5 border-b border-[#e8e8e8]'>
-          <div className='w-8 h-8 bg-[#111] rounded-lg flex items-center justify-content-center text-[10px] font-bold text-white flex items-center justify-center'>
+          <div className='w-8 h-8 bg-[#22c55e] rounded-lg flex items-center justify-content-center text-[10px] font-bold text-white flex items-center justify-center'>
             EMSI
           </div>
           <div>

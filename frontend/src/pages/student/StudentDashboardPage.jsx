@@ -71,10 +71,10 @@ export default function StudentDashboardPage() {
           <div className='flex flex-col gap-1.5'>
             <div className='flex items-center gap-2'>
               <h2 className='text-[16px] font-semibold'>Bonjour, Ayaa 👋</h2>
-              {/* Grok AI active chip */}
+              {/* Groq AI active chip */}
               <span className='flex items-center gap-1 text-[10px] font-semibold text-[#22c55e] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-full'>
                 <span className='w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse inline-block'></span>
-                Grok AI actif
+                Groq AI actif
               </span>
             </div>
             <p className='text-[12px] text-[#888] max-w-md'>

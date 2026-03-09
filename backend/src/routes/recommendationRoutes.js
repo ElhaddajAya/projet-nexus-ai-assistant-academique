@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const { generate, getBySubmission } = require("../controllers/recommendationController");
 const auth = require("../middleware/authMiddleware");
 const allowRoles = require("../middleware/roleMiddleware");
 const { generate, getBySubmission, ask } = require("../controllers/recommendationController");

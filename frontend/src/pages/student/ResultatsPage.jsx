@@ -270,7 +270,7 @@ export function ResultatDetailPage() {
           <div className='flex items-center gap-2 mb-3'>
             <h3 className='text-[13px] font-semibold'>Analyse du profil</h3>
             <span className='text-[10px] font-semibold text-[#888] bg-[#f9f9f9] border border-[#e8e8e8] px-2 py-0.5 rounded-full'>
-              Gemini AI
+              Grok AI
             </span>
           </div>
           <p className='text-[13px] text-[#444] leading-relaxed'>{r.analyse}</p>
@@ -361,7 +361,7 @@ export function ResultatDetailPage() {
         <div className='border border-[#e8e8e8] rounded-xl overflow-hidden'>
           <div className='px-5 py-3.5 border-b border-[#e8e8e8]'>
             <h3 className='text-[13px] font-semibold'>
-              Poser une question à Gemini
+              Poser une question à Grok
             </h3>
             <p className='text-[11px] text-[#888] mt-0.5'>
               Les réponses sont basées sur votre profil et vos ressources

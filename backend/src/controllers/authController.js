@@ -7,7 +7,7 @@ const register = async (req, res) =>
 {
     try
     {
-        const { nom, prenom, email, password, role, filiereId, semestre, niveau } = req.body;
+        const { nom, prenom, email, password, role } = req.body;
 
         if (!nom || !prenom || !email || !password)
         {
@@ -20,14 +20,7 @@ const register = async (req, res) =>
             return res.status(400).json({ message: "Cet email est déjà utilisé" });
         }
 
-        // role par défaut
         const finalRole = role === "admin" ? "admin" : "student";
-
-        // si student, filiere/semestre sont utiles (optionnels selon votre CDC)
-        if (finalRole === "student" && (!filiereId || !semestre))
-        {
-            return res.status(400).json({ message: "filiereId et semestre sont requis pour un étudiant" });
-        }
 
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
@@ -38,9 +31,7 @@ const register = async (req, res) =>
             email,
             passwordHash,
             role: finalRole,
-            filiereId: finalRole === "student" ? filiereId : undefined,
-            semestre: finalRole === "student" ? semestre : undefined,
-            niveau: finalRole === "student" ? (niveau || "") : "",
+            // filiereId, semestre, niveau seront remplis au premier questionnaire
         });
 
         res.status(201).json({
@@ -98,6 +89,9 @@ const login = async (req, res) =>
                 prenom: user.prenom,
                 email: user.email,
                 role: user.role,
+                filiereId: user.filiereId,
+                semestre: user.semestre,
+                niveau: user.niveau,
             },
         });
     } catch (error)
@@ -106,4 +100,57 @@ const login = async (req, res) =>
     }
 };
 
-module.exports = { register, login };
+// PUT /api/auth/me  (protégé — met à jour le profil de l'étudiant connecté)
+const updateMe = async (req, res) =>
+{
+    try
+    {
+        const userId = req.user?.id;
+
+        if (!userId)
+        {
+            return res.status(401).json({ message: "Non autorisé" });
+        }
+
+        const { filiereId, semestre, niveau } = req.body;
+
+        if (!filiereId || !semestre)
+        {
+            return res.status(400).json({ message: "filiereId et semestre sont requis" });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                filiereId,
+                semestre,
+                niveau: niveau || "",
+            },
+            { new: true, runValidators: true }
+        ).select("-passwordHash"); // ne pas renvoyer le mot de passe
+
+        if (!updatedUser)
+        {
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        }
+
+        res.status(200).json({
+            message: "Profil mis à jour",
+            user: {
+                id: updatedUser._id,
+                nom: updatedUser.nom,
+                prenom: updatedUser.prenom,
+                email: updatedUser.email,
+                role: updatedUser.role,
+                filiereId: updatedUser.filiereId,
+                semestre: updatedUser.semestre,
+                niveau: updatedUser.niveau,
+            },
+        });
+    } catch (error)
+    {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};
+
+module.exports = { register, login, updateMe };

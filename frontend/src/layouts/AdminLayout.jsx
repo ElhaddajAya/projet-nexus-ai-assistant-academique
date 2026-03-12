@@ -234,6 +234,21 @@ export default function AdminLayout() {
             <div>
               <strong className='block text-[12px] font-semibold'>Admin</strong>
               <small className='text-[11px] text-[#888]'>Administrateur</small>
+              <button
+  onClick={() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    window.location.href = "/login";
+  }}
+  className="mt-1.5 w-full flex items-center gap-2 px-2 py-1.5 rounded-[10px] text-[12px] text-[#888] hover:bg-[#f9f9f9] hover:text-red-500 transition-colors"
+>
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+    <polyline points="16 17 21 12 16 7"/>
+    <line x1="21" y1="12" x2="9" y2="12"/>
+  </svg>
+  Déconnexion
+</button>
             </div>
           </div>
         </div>

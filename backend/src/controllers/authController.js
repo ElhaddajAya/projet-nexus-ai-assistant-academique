@@ -31,7 +31,7 @@ const register = async (req, res) =>
             email,
             passwordHash,
             role: finalRole,
-            // filiereId, semestre, niveau seront remplis au premier questionnaire
+            // filiereId et niveau seront remplis au premier questionnaire
         });
 
         res.status(201).json({
@@ -89,9 +89,8 @@ const login = async (req, res) =>
                 prenom: user.prenom,
                 email: user.email,
                 role: user.role,
-                filiereId: user.filiereId,
-                semestre: user.semestre,
-                niveau: user.niveau,
+                filiereId: user.filiereId,   // peut être null si premier login
+                niveau: user.niveau,          // peut être vide si premier login
             },
         });
     } catch (error)
@@ -100,7 +99,8 @@ const login = async (req, res) =>
     }
 };
 
-// PUT /api/auth/me  (protégé — met à jour le profil de l'étudiant connecté)
+// PUT /api/auth/me  (protégé — met à jour filière + niveau de l'étudiant)
+// Le semestre n'est PAS stocké dans User car il change à chaque questionnaire
 const updateMe = async (req, res) =>
 {
     try
@@ -112,22 +112,22 @@ const updateMe = async (req, res) =>
             return res.status(401).json({ message: "Non autorisé" });
         }
 
-        const { filiereId, semestre, niveau } = req.body;
+        const { filiereId, niveau } = req.body;
 
-        if (!filiereId || !semestre)
+        // Seul filiereId est obligatoire
+        if (!filiereId)
         {
-            return res.status(400).json({ message: "filiereId et semestre sont requis" });
+            return res.status(400).json({ message: "filiereId est requis" });
         }
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,
             {
                 filiereId,
-                semestre,
                 niveau: niveau || "",
             },
             { new: true, runValidators: true }
-        ).select("-passwordHash"); // ne pas renvoyer le mot de passe
+        ).select("-passwordHash");
 
         if (!updatedUser)
         {
@@ -143,7 +143,6 @@ const updateMe = async (req, res) =>
                 email: updatedUser.email,
                 role: updatedUser.role,
                 filiereId: updatedUser.filiereId,
-                semestre: updatedUser.semestre,
                 niveau: updatedUser.niveau,
             },
         });

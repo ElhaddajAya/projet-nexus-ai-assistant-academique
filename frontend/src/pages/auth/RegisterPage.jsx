@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import api from "../../services/api";
+import api from "../../api/axios";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -88,7 +88,7 @@ export default function RegisterPage() {
                 name="prenom"
                 value={form.prenom}
                 onChange={handleChange}
-                placeholder="Mohammed"
+                placeholder="Prenom"
                 required
                 className="w-full border border-[#e8e8e8] rounded-[10px] px-4 py-2.5 text-sm text-[#111] outline-none focus:border-[#22c55e] transition-colors"
               />
@@ -102,7 +102,7 @@ export default function RegisterPage() {
                 name="nom"
                 value={form.nom}
                 onChange={handleChange}
-                placeholder="Alami"
+                placeholder="Nom"
                 required
                 className="w-full border border-[#e8e8e8] rounded-[10px] px-4 py-2.5 text-sm text-[#111] outline-none focus:border-[#22c55e] transition-colors"
               />

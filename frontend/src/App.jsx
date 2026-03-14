@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import PrivateRoute from "./components/PrivateRoute";
 
 // ── Auth ───────────────────────────────────────────────────────────────────────
 import LoginPage    from "./pages/auth/LoginPage";
@@ -17,51 +19,44 @@ import QuestionnairePage    from "./pages/student/QuestionnairePage";
 import { ResultatsListPage, ResultatDetailPage } from "./pages/student/ResultatsPage";
 import RessourcesStudentPage from "./pages/student/RessourcesStudentPage";
 
-// ── Guard ──────────────────────────────────────────────────────────────────────
-function RequireAuth({ children, role }) {
-  const token = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
-  if (!token) return <Navigate to="/login" replace />;
-  if (role && userRole !== role) return <Navigate to="/login" replace />;
-  return children;
-}
-
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
 
-        {/* ── Auth ── */}
-        <Route path="/login"    element={<LoginPage />}    />
-        <Route path="/register" element={<RegisterPage />} />
+          {/* ── Auth ── */}
+          <Route path="/login"    element={<LoginPage />}    />
+          <Route path="/register" element={<RegisterPage />} />
 
-        {/* ── Admin ── */}
-        <Route path="/admin" element={
-          <RequireAuth role="admin"><AdminLayout /></RequireAuth>
-        }>
-          <Route index              element={<AdminDashboardPage />} />
-          <Route path="filieres"    element={<FilieresPage />}       />
-          <Route path="modules"     element={<ModulesPage />}        />
-          <Route path="matieres"    element={<MatieresPage />}       />
-          <Route path="ressources"  element={<RessourcesPage />}     />
-          <Route path="soumissions" element={<SoumissionsPage />}    />
-        </Route>
+          {/* ── Admin ── */}
+          <Route path="/admin" element={
+            <PrivateRoute role="admin"><AdminLayout /></PrivateRoute>
+          }>
+            <Route index              element={<AdminDashboardPage />} />
+            <Route path="filieres"    element={<FilieresPage />}       />
+            <Route path="modules"     element={<ModulesPage />}        />
+            <Route path="matieres"    element={<MatieresPage />}       />
+            <Route path="ressources"  element={<RessourcesPage />}     />
+            <Route path="soumissions" element={<SoumissionsPage />}    />
+          </Route>
 
-        {/* ── Student ── */}
-        <Route path="/student" element={
-          <RequireAuth role="student"><StudentLayout /></RequireAuth>
-        }>
-          <Route index                element={<StudentDashboardPage />}   />
-          <Route path="questionnaire" element={<QuestionnairePage />}     />
-          <Route path="resultats"     element={<ResultatsListPage />}      />
-          <Route path="resultats/:id" element={<ResultatDetailPage />}    />
-          <Route path="ressources"    element={<RessourcesStudentPage />}  />
-        </Route>
+          {/* ── Student ── */}
+          <Route path="/student" element={
+            <PrivateRoute role="student"><StudentLayout /></PrivateRoute>
+          }>
+            <Route index                element={<StudentDashboardPage />}  />
+            <Route path="questionnaire" element={<QuestionnairePage />}     />
+            <Route path="resultats"     element={<ResultatsListPage />}     />
+            <Route path="resultats/:id" element={<ResultatDetailPage />}   />
+            <Route path="ressources"    element={<RessourcesStudentPage />} />
+          </Route>
 
-        {/* Default */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* Default */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
 
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

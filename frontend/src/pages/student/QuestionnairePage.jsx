@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import StudentTopbar from "../../components/student/StudentTopbar";
-import api from "../../src/api";
+import api from "../../api/axios";
 
 const NIVEAUX = [
   "1ère année",

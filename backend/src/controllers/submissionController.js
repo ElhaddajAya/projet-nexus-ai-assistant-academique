@@ -17,7 +17,11 @@ const getSubmissionById = async (req, res) =>
             return res.status(403).json({ message: "Accès réservé aux étudiants" });
         }
 
-        const submission = await Submission.findById(req.params.id);
+        const submission = await Submission.findById(req.params.id)
+            .populate("filiereId", "nom_filiere code_filiere")
+            .populate("moduleId", "nom_module")
+            .populate("matiereId", "nom_matiere");
+
         if (!submission)
         {
             return res.status(404).json({ message: "Soumission non trouvée" });
@@ -60,7 +64,6 @@ const createSubmission = async (req, res) =>
             return res.status(400).json({ message: "filiereId et semestre sont requis" });
         }
 
-        // Ajouter la validation
         if (!moduleId || !matiereId)
         {
             return res.status(400).json({ message: "moduleId et matiereId sont requis" });
@@ -94,7 +97,7 @@ const createSubmission = async (req, res) =>
     }
 };
 
-// GET /api/submissions/me  (protégé) - historique des submissions de l’étudiant connecté
+// GET /api/submissions/me  (protégé)
 const getMySubmissions = async (req, res) =>
 {
     try
@@ -111,7 +114,14 @@ const getMySubmissions = async (req, res) =>
             return res.status(403).json({ message: "Accès réservé aux étudiants" });
         }
 
-        const submissions = await Submission.find({ userId }).sort({ createdAt: -1 });
+        // Populate pour avoir les vrais noms dans le frontend
+        // sans ça, on reçoit juste les ObjectIds et on affiche "Matière", "Module"...
+        const submissions = await Submission.find({ userId })
+            .populate("filiereId", "nom_filiere code_filiere")
+            .populate("moduleId", "nom_module")
+            .populate("matiereId", "nom_matiere")
+            .sort({ createdAt: -1 });
+
         res.status(200).json(submissions);
     } catch (error)
     {

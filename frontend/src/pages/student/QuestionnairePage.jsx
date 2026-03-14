@@ -24,7 +24,43 @@ const NIVEAUX = [
 ];
 
 // ─── Semestres fixes ──────────────────────────────────────────────────────────
-const SEMESTRES = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10"];
+const SEMESTRES = ["S1", "S2"];
+
+// ─── Card wrapper — défini HORS du composant pour éviter le bug de focus ─────
+// Si Card était défini à l'intérieur, React le recrée à chaque re-render
+// ce qui cause la perte de focus sur les inputs/textareas
+function Card({ children, progress, submitted }) {
+  return (
+    <div className='w-full max-w-[500px] border border-[#e8e8e8] rounded-[14px] overflow-hidden bg-white'>
+      <div className='h-[3px] bg-[#e8e8e8]'>
+        <div
+          className='h-full bg-[#22c55e] rounded-full transition-all duration-300'
+          style={{ width: `${submitted ? 100 : progress}%` }}
+        />
+      </div>
+      <div className='p-6'>{children}</div>
+    </div>
+  );
+}
+
+// ─── Header d'étape — défini HORS du composant pour la même raison ────────────
+function StepHeader({ step, total, title, desc }) {
+  return (
+    <div className='mb-5'>
+      <div className='flex items-center justify-between mb-2'>
+        <span className='text-[11px] font-semibold text-[#888]'>
+          Étape {step} sur {total}
+        </span>
+        <StepDots
+          current={step}
+          total={total}
+        />
+      </div>
+      <h2 className='text-[16px] font-semibold mb-1'>{title}</h2>
+      <p className='text-[12px] text-[#888] leading-relaxed'>{desc}</p>
+    </div>
+  );
+}
 
 // ─── Step dots ────────────────────────────────────────────────────────────────
 function StepDots({ current, total }) {
@@ -342,36 +378,6 @@ export default function QuestionnairePage() {
   const TOTAL = 5;
   const progress = (step / TOTAL) * 100;
 
-  // ── Wrapper carte commun ──
-  const Card = ({ children }) => (
-    <div className='w-full max-w-[500px] border border-[#e8e8e8] rounded-[14px] overflow-hidden bg-white'>
-      <div className='h-[3px] bg-[#e8e8e8]'>
-        <div
-          className='h-full bg-[#22c55e] rounded-full transition-all duration-300'
-          style={{ width: `${submitted ? 100 : progress}%` }}
-        />
-      </div>
-      <div className='p-6'>{children}</div>
-    </div>
-  );
-
-  // ── En-tête d'étape ──
-  const Header = ({ title, desc }) => (
-    <div className='mb-5'>
-      <div className='flex items-center justify-between mb-2'>
-        <span className='text-[11px] font-semibold text-[#888]'>
-          Étape {step} sur {TOTAL}
-        </span>
-        <StepDots
-          current={step}
-          total={TOTAL}
-        />
-      </div>
-      <h2 className='text-[16px] font-semibold mb-1'>{title}</h2>
-      <p className='text-[12px] text-[#888] leading-relaxed'>{desc}</p>
-    </div>
-  );
-
   return (
     <>
       <StudentTopbar
@@ -407,7 +413,10 @@ export default function QuestionnairePage() {
 
         {/* ── Écran succès ── */}
         {submitted ? (
-          <Card>
+          <Card
+            progress={progress}
+            submitted={submitted}
+          >
             <div className='flex flex-col items-center text-center gap-4 py-6'>
               <div className='w-12 h-12 rounded-full bg-[#f0fdf4] border border-[#bbf7d0] flex items-center justify-center'>
                 <svg
@@ -451,7 +460,10 @@ export default function QuestionnairePage() {
           </Card>
         ) : loading ? (
           /* ── Chargement Groq ── */
-          <Card>
+          <Card
+            progress={progress}
+            submitted={submitted}
+          >
             <div className='flex flex-col items-center text-center gap-4 py-8'>
               <div className='w-10 h-10 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin' />
               <p className='text-[13px] font-medium'>
@@ -464,8 +476,13 @@ export default function QuestionnairePage() {
           </Card>
         ) : step === 1 ? (
           /* ── Étape 1 : Filière / Niveau / Semestre ── */
-          <Card>
-            <Header
+          <Card
+            progress={progress}
+            submitted={submitted}
+          >
+            <StepHeader
+              step={step}
+              total={TOTAL}
               title='Votre parcours'
               desc='Sélectionnez votre filière, niveau et semestre actuel.'
             />
@@ -510,8 +527,13 @@ export default function QuestionnairePage() {
           </Card>
         ) : step === 2 ? (
           /* ── Étape 2 : Module ── */
-          <Card>
-            <Header
+          <Card
+            progress={progress}
+            submitted={submitted}
+          >
+            <StepHeader
+              step={step}
+              total={TOTAL}
               title='Module concerné'
               desc='Choisissez le module dans lequel vous rencontrez des difficultés.'
             />
@@ -547,8 +569,13 @@ export default function QuestionnairePage() {
           </Card>
         ) : step === 3 ? (
           /* ── Étape 3 : Matière ── */
-          <Card>
-            <Header
+          <Card
+            progress={progress}
+            submitted={submitted}
+          >
+            <StepHeader
+              step={step}
+              total={TOTAL}
               title='Matière concernée'
               desc='Sélectionnez la matière dans laquelle vous avez des difficultés.'
             />
@@ -582,8 +609,13 @@ export default function QuestionnairePage() {
           </Card>
         ) : step === 4 ? (
           /* ── Étape 4 : Difficultés ── */
-          <Card>
-            <Header
+          <Card
+            progress={progress}
+            submitted={submitted}
+          >
+            <StepHeader
+              step={step}
+              total={TOTAL}
               title='Vos difficultés'
               desc='Cochez les notions qui vous posent problème. Vous pouvez en sélectionner plusieurs.'
             />
@@ -635,8 +667,13 @@ export default function QuestionnairePage() {
           </Card>
         ) : (
           /* ── Étape 5 : Objectifs ── */
-          <Card>
-            <Header
+          <Card
+            progress={progress}
+            submitted={submitted}
+          >
+            <StepHeader
+              step={step}
+              total={TOTAL}
               title='Vos objectifs'
               desc="Qu'est-ce qui vous motive à améliorer cette matière ?"
             />

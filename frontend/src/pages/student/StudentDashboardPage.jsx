@@ -157,9 +157,7 @@ export default function StudentDashboardPage() {
           <StatCard
             icon='⭐'
             label='Score moyen'
-            value={
-              loading ? "…" : scoreMoyen !== null ? `${scoreMoyen}/100` : "—"
-            }
+            value={loading ? "…" : scoreMoyen !== null ? `${scoreMoyen}%` : "—"}
             sub={
               scoreMoyen !== null
                 ? "Niveau estimé par Groq AI"
@@ -171,11 +169,7 @@ export default function StudentDashboardPage() {
             icon='🏆'
             label='Meilleur score'
             value={
-              loading
-                ? "…"
-                : meilleurScore !== null
-                  ? `${meilleurScore}/100`
-                  : "—"
+              loading ? "…" : meilleurScore !== null ? `${meilleurScore}%` : "—"
             }
             sub={
               meilleurScore !== null
@@ -261,7 +255,7 @@ export default function StudentDashboardPage() {
                                 : "bg-red-50 text-red-500"
                           }`}
                         >
-                          {note}/100
+                          {note}%
                         </span>
                       ) : (
                         <span className='text-[11px] text-[#ccc]'>—</span>

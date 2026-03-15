@@ -320,7 +320,7 @@ export function ResultatDetailPage() {
         }
       />
 
-      <div className='p-7 flex flex-col gap-5 max-w-[780px]'>
+      <div className='p-7 flex flex-col gap-5 w-full'>
         {/* ── Breadcrumb + date ── */}
         <div className='flex items-center gap-2 flex-wrap'>
           {[

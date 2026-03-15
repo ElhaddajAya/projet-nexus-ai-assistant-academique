@@ -35,7 +35,7 @@ const generateRecommendation = async ({
     ${ressourcesText}
 
     Génère une réponse avec EXACTEMENT cette structure JSON.
-    Respecte les types : analyse est une string, plan_travail est un array d'objets, conseils_ia est un array de strings, ressources_recommandees est un array d'objets.
+    Respecte les types : analyse est une string, plan_travail est un array d'objets, conseils_ia est un array de strings, ressources_recommandees (selon les ressources disponibles) est un array d'objets.
 
     {
     "analyse": "2 à 3 phrases décrivant le profil académique de l'étudiant, ses difficultés principales et ses points forts",
@@ -80,28 +80,53 @@ const generateRecommendation = async ({
         "titre": "Titre exact de la ressource",
         "lien": "https://lien-exact-de-la-ressource",
         "type": "document"
+        },
+        {
+        "titre": "Titre exact de la ressource",
+        "lien": "https://lien-exact-de-la-ressource",
+        "type": "TP/TD"
+        },
+        {
+        "titre": "Titre exact de la ressource",
+        "lien": "https://lien-exact-de-la-ressource",
+        "type": "site web"
         }
     ]
-    }`;
+    }
 
-    // Appel à Groq avec system + user messages séparés
+    Pour note_progression : donne un entier entre 0 et 100.
+    Logique : peu de difficultés = note haute, beaucoup de difficultés fondamentales = note basse.
+    Exemples : débutant complet = 10-25, bases acquises = 30-50, intermédiaire = 55-75, avancé = 80-95.`;
+
+    // Appeler Groq avec les prompts et récupérer la réponse
     const response = await groq.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt }
         ],
-        temperature: 0.3,      // plus bas = plus prévisible et structuré
+        temperature: 0.3,
         max_tokens: 2000,
-        response_format: { type: "json_object" }, // force le JSON côté Groq
+        response_format: { type: "json_object" },
     });
 
-    // Extraire et parser la réponse
     const text = response.choices[0].message.content;
-
-    // Nettoyer au cas où il y aurait quand même des backticks
     const clean = text.replace(/```json|```/g, "").trim();
-    return JSON.parse(clean);
+    const parsed = JSON.parse(clean);
+
+    // Valider note_progression — si invalide, mettre 50 par défaut
+    if (
+        typeof parsed.note_progression !== "number" ||
+        parsed.note_progression < 0 ||
+        parsed.note_progression > 100
+    )
+    {
+        parsed.note_progression = 50;
+    }
+    // S'assurer que c'est un entier
+    parsed.note_progression = Math.round(parsed.note_progression);
+
+    return parsed;
 };
 
 // Fonction pour répondre à une question de suivi

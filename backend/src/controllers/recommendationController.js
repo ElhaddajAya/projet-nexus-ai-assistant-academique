@@ -1,7 +1,6 @@
 const Recommendation = require("../models/Recommendation");
 const Submission = require("../models/Submission");
 const Ressource = require("../models/Ressource");
-const Matiere = require("../models/Matiere");
 const { generateRecommendation, askFollowUp } = require("../services/groqService");
 
 
@@ -29,7 +28,6 @@ const generate = async (req, res) =>
       return res.status(404).json({ message: "Submission non trouvée" });
     }
 
-    // Vérifier que les champs requis sont bien populés
     if (!submission.filiereId || !submission.moduleId || !submission.matiereId)
     {
       return res.status(400).json({
@@ -37,21 +35,18 @@ const generate = async (req, res) =>
       });
     }
 
-    // 2. Récupérer les ressources liées aux matières du module de la filière
-    const matieres = await Matiere.find({}).populate({
-      path: "moduleId",
-      match: { id_filiere: submission.filiereId._id },
+    // 2. Récupérer UNIQUEMENT les ressources de la matière choisie
+    //    CORRECTION : avant on récupérait toutes les ressources de la filière,
+    //    ce qui envoyait des ressources hors-sujet à Groq (ex: React pour Laravel)
+    const ressources = await Ressource.find({
+      matiereId: submission.matiereId._id,
     });
-
-    const matieresFiltrees = matieres.filter(m => m.moduleId !== null);
-    const matiereIds = matieresFiltrees.map(m => m._id);
-    const ressources = await Ressource.find({ matiereId: { $in: matiereIds } });
 
     // 3. Appeler Groq pour générer la recommandation
     const result = await generateRecommendation({
       filiere: submission.filiereId.nom_filiere,
-      module: submission.moduleId?.nom_module,
-      matiere: submission.matiereId?.nom_matiere,
+      module: submission.moduleId.nom_module,
+      matiere: submission.matiereId.nom_matiere,
       semestre: submission.semestre,
       niveau: submission.niveau,
       difficultes: submission.difficultes,
@@ -67,7 +62,7 @@ const generate = async (req, res) =>
       plan_travail: result.plan_travail,
       conseils_ia: result.conseils_ia,
       ressources_recommandees: result.ressources_recommandees,
-      chat_history: [], // historique vide au départ
+      chat_history: [],
     });
 
     res.status(201).json(recommendation);
@@ -119,7 +114,7 @@ const ask = async (req, res) =>
       return res.status(404).json({ message: "Recommandation non trouvée" });
     }
 
-    // 2. Récupérer la submission avec populate pour le contexte
+    // 2. Récupérer la submission avec populate pour le contexte Groq
     const submission = await Submission.findById(submissionId)
       .populate("filiereId", "nom_filiere")
       .populate("matiereId", "nom_matiere");

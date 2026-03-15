@@ -1,9 +1,10 @@
 // ─── ModulesPage ──────────────────────────────────────────────────────────────
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminTopbar from "../../components/admin/AdminTopbar";
 import { RowActions } from "../../components/admin/RowActions";
 import SearchInput from "../../components/admin/SearchInput";
 import ModuleModal from "../../components/admin/modals/ModuleModal";
+import api from "../../api/axios";
 
 const INIT_MODULES = [
   { _id:"1", nom:"Génie Logiciel",              filiere:"4IIR", semestre:"S6", matieres:4 },
@@ -47,7 +48,8 @@ export function ModulesPage() {
             </div>
             <div className="flex items-center gap-2">
               <SearchInput value={search} onChange={setSearch} />
-              <button onClick={() => { setEditing(null); setModal(true); }} className="flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors">
+              <button onClick={() => { setEditing(null); setModal(true); }}
+                className="flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors">
                 + Ajouter
               </button>
             </div>
@@ -87,12 +89,12 @@ export function ModulesPage() {
 import MatiereModal from "../../components/admin/modals/MatiereModal";
 
 const INIT_MATIERES = [
-  { _id:"1", nom:"Conception UML",      module:"Génie Logiciel",            difficultes:"5 difficultés", ressources:3 },
-  { _id:"2", nom:"Design Patterns",     module:"Génie Logiciel",            difficultes:"4 difficultés", ressources:2 },
-  { _id:"3", nom:"Machine Learning",    module:"Intelligence Artificielle",  difficultes:"6 difficultés", ressources:4 },
-  { _id:"4", nom:"Protocoles TCP/IP",   module:"Réseaux & Sécurité",        difficultes:"4 difficultés", ressources:2 },
-  { _id:"5", nom:"React JS",            module:"Développement Web & Mobile", difficultes:"5 difficultés", ressources:3 },
-  { _id:"6", nom:"Structures de données",module:"Algorithmique avancée",    difficultes:"3 difficultés", ressources:2 },
+  { _id:"1", nom:"Conception UML",       module:"Génie Logiciel",            difficultes:"5 difficultés", ressources:3 },
+  { _id:"2", nom:"Design Patterns",      module:"Génie Logiciel",            difficultes:"4 difficultés", ressources:2 },
+  { _id:"3", nom:"Machine Learning",     module:"Intelligence Artificielle",  difficultes:"6 difficultés", ressources:4 },
+  { _id:"4", nom:"Protocoles TCP/IP",    module:"Réseaux & Sécurité",        difficultes:"4 difficultés", ressources:2 },
+  { _id:"5", nom:"React JS",             module:"Développement Web & Mobile", difficultes:"5 difficultés", ressources:3 },
+  { _id:"6", nom:"Structures de données",module:"Algorithmique avancée",     difficultes:"3 difficultés", ressources:2 },
 ];
 
 export function MatieresPage() {
@@ -128,7 +130,8 @@ export function MatieresPage() {
             </div>
             <div className="flex items-center gap-2">
               <SearchInput value={search} onChange={setSearch} />
-              <button onClick={() => { setEditing(null); setModal(true); }} className="flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors">
+              <button onClick={() => { setEditing(null); setModal(true); }}
+                className="flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors">
                 + Ajouter
               </button>
             </div>
@@ -164,43 +167,76 @@ export function MatieresPage() {
   );
 }
 
-// ─── RessourcesPage ───────────────────────────────────────────────────────────
+// ─── RessourcesPage ─── CONNECTÉE AU BACKEND ──────────────────────────────────
 import RessourceModal from "../../components/admin/modals/RessourceModal";
 
-const TYPE_STYLES = {
-  doc: { label: "Document", class: "bg-blue-100 text-blue-700" },
-  vid: { label: "Vidéo",    class: "bg-red-100 text-red-700"   },
-  tp:  { label: "TP / TD",  class: "bg-amber-100 text-amber-700"},
-};
-
-const INIT_RESSOURCES = [
-  { _id:"1", titre:"Cours UML – Conception OO",  type:"doc", matiere:"Conception UML",  lien:"emsi.ma/uml.pdf"    },
-  { _id:"2", titre:"UML – Héritage et composition",type:"vid",matiere:"Conception UML", lien:"youtube.com/…"      },
-  { _id:"3", titre:"TP noté – Cas d'utilisation",type:"tp",  matiere:"Conception UML",  lien:"emsi.ma/tp-uml.pdf" },
-  { _id:"4", titre:"Machine Learning – SVM",      type:"doc", matiere:"Machine Learning",lien:"emsi.ma/svm.pdf"   },
-  { _id:"5", titre:"useState et useEffect",        type:"vid", matiere:"React JS",       lien:"youtube.com/…"     },
-  { _id:"6", titre:"TP Réseaux – Subnetting",     type:"tp",  matiere:"Protocoles TCP/IP",lien:"emsi.ma/tp-net.pdf"},
-];
-
 export function RessourcesPage() {
-  const [data, setData]       = useState(INIT_RESSOURCES);
-  const [search, setSearch]   = useState("");
-  const [modalOpen, setModal] = useState(false);
-  const [editing, setEditing] = useState(null);
+  const [data,      setData]    = useState([]);
+  const [search,    setSearch]  = useState("");
+  const [modalOpen, setModal]   = useState(false);
+  const [editing,   setEditing] = useState(null);
+  const [loading,   setLoading] = useState(true);
+
+  const TYPE_STYLES = {
+    video:    { label: "Vidéo",    class: "bg-red-100 text-red-700"     },
+    document: { label: "Document", class: "bg-blue-100 text-blue-700"   },
+    "TP/TD":  { label: "TP / TD",  class: "bg-amber-100 text-amber-700" },
+  };
+
+  // Charger toutes les ressources depuis l'API
+  useEffect(() => {
+    api.get("/ressources")
+      .then((res) => setData(res.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = data.filter((r) =>
-    r.titre.toLowerCase().includes(search.toLowerCase()) ||
-    r.matiere.toLowerCase().includes(search.toLowerCase())
+    r.titre.toLowerCase().includes(search.toLowerCase())
   );
 
-  function handleSave(item) {
-    if (editing) setData((d) => d.map((r) => (r._id === item._id ? item : r)));
-    else setData((d) => [...d, { ...item, _id: Date.now().toString() }]);
-    setModal(false); setEditing(null);
+  // Créer ou mettre à jour
+  async function handleSave(item) {
+    try {
+      if (editing) {
+        const res = await api.put(`/ressources/${item._id}`, {
+          titre:       item.titre,
+          description: item.description || "",
+          lien:        item.lien,
+          type:        item.type,
+          matiereId:   item.matiereId,
+          filiereId:   item.filiereId,
+          niveau:      item.niveau || "",
+        });
+        setData((d) => d.map((r) => (r._id === item._id ? res.data : r)));
+      } else {
+        const res = await api.post("/ressources", {
+          titre:       item.titre,
+          description: item.description || "",
+          lien:        item.lien,
+          type:        item.type,
+          matiereId:   item.matiereId,
+          filiereId:   item.filiereId,
+          niveau:      item.niveau || "",
+        });
+        setData((d) => [...d, res.data]);
+      }
+      setModal(false);
+      setEditing(null);
+    } catch (err) {
+      alert("Erreur : " + (err.response?.data?.message || err.message));
+    }
   }
 
-  function handleDelete(id) {
-    if (confirm("Supprimer cette ressource ?")) setData((d) => d.filter((r) => r._id !== id));
+  // Supprimer
+  async function handleDelete(id) {
+    if (!confirm("Supprimer cette ressource ?")) return;
+    try {
+      await api.delete(`/ressources/${id}`);
+      setData((d) => d.filter((r) => r._id !== id));
+    } catch (err) {
+      alert("Erreur lors de la suppression");
+    }
   }
 
   return (
@@ -215,7 +251,9 @@ export function RessourcesPage() {
             </div>
             <div className="flex items-center gap-2">
               <SearchInput value={search} onChange={setSearch} />
-              <button onClick={() => { setEditing(null); setModal(true); }} className="flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors">
+              <button
+                onClick={() => { setEditing(null); setModal(true); }}
+                className="flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors">
                 + Ajouter
               </button>
             </div>
@@ -223,26 +261,34 @@ export function RessourcesPage() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-[#e8e8e8]">
-                {["Titre","Type","Matière","Lien",""].map((h) => (
+                {["Titre", "Type", "Lien", ""].map((h) => (
                   <th key={h} className="px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-10 text-[13px] text-[#888]">Aucune ressource trouvée</td></tr>
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-10">
+                    <div className="w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto"/>
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={4} className="text-center py-10 text-[13px] text-[#888]">Aucune ressource trouvée</td></tr>
               ) : filtered.map((r) => {
-                const t = TYPE_STYLES[r.type] || TYPE_STYLES.doc;
+                const t = TYPE_STYLES[r.type] || TYPE_STYLES["document"];
                 return (
                   <tr key={r._id} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group">
                     <td className="px-[18px] py-3 text-[13px] font-medium">{r.titre}</td>
                     <td className="px-[18px] py-3">
                       <span className={`text-[9px] font-bold px-2 py-1 rounded ${t.class}`}>{t.label}</span>
                     </td>
-                    <td className="px-[18px] py-3 text-[12px] text-[#888]">{r.matiere}</td>
                     <td className="px-[18px] py-3 text-[12px] font-mono text-[#888] max-w-[160px] truncate">{r.lien}</td>
                     <td className="px-[18px] py-3">
-                      <RowActions onEdit={() => { setEditing(r); setModal(true); }} onDelete={() => handleDelete(r._id)} />
+                      <RowActions
+                        onEdit={() => { setEditing(r); setModal(true); }}
+                        onDelete={() => handleDelete(r._id)}
+                      />
                     </td>
                   </tr>
                 );
@@ -251,25 +297,34 @@ export function RessourcesPage() {
           </table>
         </div>
       </div>
-      <RessourceModal open={modalOpen} onClose={() => { setModal(false); setEditing(null); }} onSave={handleSave} initial={editing} />
+      <RessourceModal
+        open={modalOpen}
+        onClose={() => { setModal(false); setEditing(null); }}
+        onSave={handleSave}
+        initial={editing}
+      />
     </>
   );
 }
 
-// ─── SoumissionsPage ──────────────────────────────────────────────────────────
+// ─── SoumissionsPage ─── CONNECTÉE AU BACKEND ─────────────────────────────────
 export function SoumissionsPage() {
-  const [search, setSearch] = useState("");
-  const DATA = [
-    { nom:"Ayaa B.",    filiere:"4IIR · S6", matiere:"Conception UML",    objectif:"Préparer un stage", date:"06/03/2026" },
-    { nom:"Youssef A.", filiere:"4IIR · S6", matiere:"Machine Learning",  objectif:"Examens",           date:"05/03/2026" },
-    { nom:"Sara M.",    filiere:"GC · S5",   matiere:"Béton armé",        objectif:"Combler les lacunes",date:"05/03/2026" },
-    { nom:"Hamza K.",   filiere:"4IIR · S5", matiere:"Réseaux TCP/IP",    objectif:"PFE",               date:"04/03/2026" },
-    { nom:"Nadia R.",   filiere:"GI · S6",   matiere:"Gestion de projet", objectif:"Améliorer la note", date:"03/03/2026" },
-  ];
-  const filtered = DATA.filter((s) =>
-    s.nom.toLowerCase().includes(search.toLowerCase()) ||
-    s.matiere.toLowerCase().includes(search.toLowerCase())
+  const [data,    setData]    = useState([]);
+  const [search,  setSearch]  = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // Charger les soumissions de l'utilisateur connecté
+  useEffect(() => {
+    api.get("/submissions/me")
+      .then((res) => setData(res.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = data.filter((s) =>
+    JSON.stringify(s).toLowerCase().includes(search.toLowerCase())
   );
+
   return (
     <>
       <AdminTopbar title="Soumissions" subtitle="Historique des analyses générées" />
@@ -278,26 +333,42 @@ export function SoumissionsPage() {
           <div className="px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between">
             <div>
               <h3 className="text-[13px] font-semibold">Toutes les soumissions</h3>
-              <p className="text-[11px] text-[#888] mt-0.5">87 analyses générées au total</p>
+              <p className="text-[11px] text-[#888] mt-0.5">{data.length} soumission{data.length > 1 ? "s" : ""} au total</p>
             </div>
             <SearchInput value={search} onChange={setSearch} />
           </div>
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-[#e8e8e8]">
-                {["Étudiant","Filière","Matière","Objectif","Date"].map((h) => (
+                {["Filière", "Semestre", "Difficultés", "Objectifs", "Date"].map((h) => (
                   <th key={h} className="px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map((s, i) => (
-                <tr key={i} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group">
-                  <td className="px-[18px] py-3 text-[13px] font-medium">{s.nom}</td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888]">{s.filiere}</td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888]">{s.matiere}</td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888]">{s.objectif}</td>
-                  <td className="px-[18px] py-3 text-[12px] font-mono text-[#888]">{s.date}</td>
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-10">
+                    <div className="w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto"/>
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={5} className="text-center py-10 text-[13px] text-[#888]">Aucune soumission trouvée</td></tr>
+              ) : filtered.map((s) => (
+                <tr key={s._id} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors">
+                  <td className="px-[18px] py-3 text-[13px] font-medium">
+                    {s.filiereId?.nom_filiere || "—"}
+                  </td>
+                  <td className="px-[18px] py-3 text-[12px] text-[#888]">{s.semestre}</td>
+                  <td className="px-[18px] py-3 text-[12px] text-[#888] max-w-[180px] truncate">
+                    {Array.isArray(s.difficultes) ? s.difficultes.join(", ") : s.difficultes}
+                  </td>
+                  <td className="px-[18px] py-3 text-[12px] text-[#888] max-w-[180px] truncate">
+                    {Array.isArray(s.objectifs) ? s.objectifs.join(", ") : s.objectifs}
+                  </td>
+                  <td className="px-[18px] py-3 text-[12px] font-mono text-[#888]">
+                    {new Date(s.createdAt).toLocaleDateString("fr-FR")}
+                  </td>
                 </tr>
               ))}
             </tbody>

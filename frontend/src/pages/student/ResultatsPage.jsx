@@ -8,8 +8,9 @@ const TYPE_STYLE = {
   doc: { label: "DOC", cls: "bg-blue-100 text-blue-700" },
   vid: { label: "VID", cls: "bg-red-100 text-red-700" },
   video: { label: "VID", cls: "bg-red-100 text-red-700" },
-  tp: { label: "TP", cls: "bg-amber-100 text-amber-700" },
+  "TP/TD": { label: "TP/TD", cls: "bg-green-100 text-green-700" },
   document: { label: "DOC", cls: "bg-blue-100 text-blue-700" },
+  "site web": { label: "WEB", cls: "bg-yellow-100 text-yellow-700" },
 };
 
 // ─── Helper : formater une date ISO en DD/MM/YYYY ─────────────────────────────
@@ -320,7 +321,7 @@ export function ResultatDetailPage() {
         }
       />
 
-      <div className='p-7 flex flex-col gap-5 max-w-[780px]'>
+      <div className='p-7 flex flex-col gap-5 w-full'>
         {/* ── Breadcrumb + date ── */}
         <div className='flex items-center gap-2 flex-wrap'>
           {[

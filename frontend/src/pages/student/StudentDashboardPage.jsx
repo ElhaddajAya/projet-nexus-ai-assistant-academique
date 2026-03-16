@@ -1,62 +1,103 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import StudentTopbar from "../../components/student/StudentTopbar";
-import StatCard from "../../components/student/StatCard";
+import { useAuth } from "../../context/AuthContext";
+import api from "../../api/axios";
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-const RECENT_ANALYSES = [
-  {
-    id: "1",
-    matiere: "Conception UML",
-    module: "Génie Logiciel",
-    date: "06/03/2026",
-    score: 72,
-  },
-  {
-    id: "2",
-    matiere: "Machine Learning",
-    module: "Intelligence Artificielle",
-    date: "02/03/2026",
-    score: 58,
-  },
-  {
-    id: "3",
-    matiere: "React JS",
-    module: "Développement Web",
-    date: "24/02/2026",
-    score: 85,
-  },
-];
+// ─── Helper : formater une date ISO ──────────────────────────────────────────
+function formatDate(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("fr-FR");
+}
 
-const PROGRESSION = [
-  { matiere: "Conception UML", pct: 72 },
-  { matiere: "Machine Learning", pct: 58 },
-  { matiere: "React JS", pct: 85 },
-  { matiere: "Réseaux TCP/IP", pct: 64 },
-];
-
-// Steps for the questionnaire guide
-const STEPS = [
-  { num: 1, label: "Filière, niveau & semestre", done: true },
-  { num: 2, label: "Module concerné", done: true },
-  { num: 3, label: "Matière concernée", done: true },
-  { num: 4, label: "Vos difficultés", done: false },
-  { num: 5, label: "Vos objectifs", done: false },
-];
-
-const QUICK_ACTIONS = [
-  {
-    label: "Nouveau questionnaire",
-    icon: "📋",
-    path: "/student/questionnaire",
-  },
-  { label: "Mes résultats", icon: "📊", path: "/student/resultats" },
-  { label: "Ressources", icon: "📚", path: "/student/ressources" },
-  { label: "Mon profil", icon: "👤", path: "/student/profil" },
-];
+// ─── Stat card avec barre de progression optionnelle ─────────────────────────
+function StatCard({ icon, label, value, sub, progress }) {
+  return (
+    <div className='border border-[#e8e8e8] rounded-[10px] p-[18px] hover:border-[#ccc] hover:shadow-sm transition-all flex flex-col gap-2'>
+      <div className='flex items-center justify-between'>
+        <span className='text-[18px]'>{icon}</span>
+        <span className='text-[24px] font-bold font-mono text-[#111]'>
+          {value}
+        </span>
+      </div>
+      <div>
+        <p className='text-[12px] font-semibold text-[#111]'>{label}</p>
+        {sub && <p className='text-[11px] text-[#888] mt-0.5'>{sub}</p>}
+      </div>
+      {/* Barre de progression — affichée seulement pour les stats avec score */}
+      {progress !== undefined && (
+        <div className='h-[3px] bg-[#e8e8e8] rounded-full mt-1'>
+          <div
+            className={`h-full rounded-full transition-all duration-500
+              ${progress >= 75 ? "bg-[#22c55e]" : progress >= 50 ? "bg-amber-400" : "bg-red-400"}`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function StudentDashboardPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const [submissions, setSubmissions] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        // 1. Charger les submissions
+        const { data: subs } = await api.get("/submissions/me");
+        setSubmissions(subs);
+
+        // 2. Charger les recommendations pour avoir les note_progression
+        const recos = await Promise.all(
+          subs.map(async (sub) => {
+            try {
+              const { data } = await api.get(`/recommendations/${sub._id}`);
+              return data;
+            } catch {
+              return null;
+            }
+          }),
+        );
+        setRecommendations(recos.filter(Boolean));
+      } catch {
+        setSubmissions([]);
+        setRecommendations([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  // ── Calcul des stats ──
+  const totalAnalyses = submissions.length;
+
+  // Matières uniques travaillées
+  const matieresUniques = new Set(
+    submissions.map((s) => s.matiereId?._id).filter(Boolean),
+  ).size;
+
+  // Notes de progression disponibles
+  const notes = recommendations
+    .map((r) => r.note_progression)
+    .filter((n) => typeof n === "number");
+
+  const scoreMoyen =
+    notes.length > 0
+      ? Math.round(notes.reduce((a, b) => a + b, 0) / notes.length)
+      : null;
+
+  const meilleurScore = notes.length > 0 ? Math.max(...notes) : null;
+
+  // Les 3 dernières submissions
+  const recent = submissions.slice(0, 3);
 
   return (
     <>
@@ -66,14 +107,15 @@ export default function StudentDashboardPage() {
       />
 
       <div className='p-7 flex flex-col gap-6'>
-        {/* ── Welcome banner ── */}
+        {/* ── Bannière de bienvenue ── */}
         <div className='border border-[#e8e8e8] rounded-xl p-5 flex items-center justify-between'>
           <div className='flex flex-col gap-1.5'>
             <div className='flex items-center gap-2'>
-              <h2 className='text-[16px] font-semibold'>Bonjour, Ayaa 👋</h2>
-              {/* Groq AI active chip */}
+              <h2 className='text-[16px] font-semibold'>
+                Bonjour, {user?.prenom} 👋
+              </h2>
               <span className='flex items-center gap-1 text-[10px] font-semibold text-[#22c55e] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-full'>
-                <span className='w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse inline-block'></span>
+                <span className='w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse inline-block' />
                 Groq AI actif
               </span>
             </div>
@@ -98,81 +140,126 @@ export default function StudentDashboardPage() {
           </div>
         </div>
 
-        {/* ── Stats ── */}
+        {/* ── Stats réelles ── */}
         <div className='grid grid-cols-4 gap-3.5'>
           <StatCard
-            num='3'
+            icon='📋'
             label='Analyses réalisées'
-            tag='Ce mois'
+            value={loading ? "…" : totalAnalyses}
+            sub='Questionnaires soumis'
           />
           <StatCard
-            num='12'
-            label='Ressources recommandées'
-            tag='Disponibles'
+            icon='📚'
+            label='Matières travaillées'
+            value={loading ? "…" : matieresUniques}
+            sub='Matières uniques'
           />
           <StatCard
-            num='2'
-            label='Objectifs en cours'
-            tag='Actifs'
-          />
-          <StatCard
-            num='72%'
+            icon='⭐'
             label='Score moyen'
-            tag='↑ +8% ce mois'
+            value={loading ? "…" : scoreMoyen !== null ? `${scoreMoyen}%` : "—"}
+            sub={
+              scoreMoyen !== null
+                ? "Niveau estimé par Groq AI"
+                : "Pas encore d'analyse"
+            }
+            progress={scoreMoyen}
+          />
+          <StatCard
+            icon='🏆'
+            label='Meilleur score'
+            value={
+              loading ? "…" : meilleurScore !== null ? `${meilleurScore}%` : "—"
+            }
+            sub={
+              meilleurScore !== null
+                ? "Ton meilleur résultat"
+                : "Pas encore d'analyse"
+            }
+            progress={meilleurScore}
           />
         </div>
 
-        {/* ── Une colonne ── */}
-        <div className='grid grid-cols-1'>
-          <div className='flex flex-col gap-5'>
-            {/* Recent analyses */}
-            <div className='border border-[#e8e8e8] rounded-xl overflow-hidden'>
-              <div className='px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between'>
-                <div>
-                  <h3 className='text-[13px] font-semibold'>
-                    Analyses récentes
-                  </h3>
-                  <p className='text-[11px] text-[#888] mt-0.5'>
-                    Vos dernières soumissions
-                  </p>
-                </div>
-                <button
-                  onClick={() => navigate("/student/resultats")}
-                  className='text-[11px] font-medium text-[#888] hover:text-[#111] transition-colors'
-                >
-                  Voir tout →
-                </button>
-              </div>
-              <div className='divide-y divide-[#e8e8e8]'>
-                {RECENT_ANALYSES.map((a) => (
+        {/* ── Analyses récentes ── */}
+        <div className='border border-[#e8e8e8] rounded-xl overflow-hidden'>
+          <div className='px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between'>
+            <div>
+              <h3 className='text-[13px] font-semibold'>Analyses récentes</h3>
+              <p className='text-[11px] text-[#888] mt-0.5'>
+                Vos dernières soumissions
+              </p>
+            </div>
+            <button
+              onClick={() => navigate("/student/resultats")}
+              className='text-[11px] font-medium text-[#888] hover:text-[#111] transition-colors'
+            >
+              Voir tout →
+            </button>
+          </div>
+
+          {loading ? (
+            <div className='flex items-center justify-center py-10 gap-2 text-[13px] text-[#888]'>
+              <div className='w-4 h-4 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin' />
+              Chargement…
+            </div>
+          ) : recent.length === 0 ? (
+            <div className='flex flex-col items-center gap-3 py-10 text-center'>
+              <p className='text-[13px] text-[#888]'>
+                Vous n'avez pas encore d'analyses.
+              </p>
+              <button
+                onClick={() => navigate("/student/questionnaire")}
+                className='px-4 py-2 bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors'
+              >
+                Faire mon premier questionnaire
+              </button>
+            </div>
+          ) : (
+            <div className='divide-y divide-[#e8e8e8]'>
+              {recent.map((sub) => {
+                // Trouver la recommendation correspondante pour afficher le score
+                const reco = recommendations.find(
+                  (r) =>
+                    r.submissionId === sub._id ||
+                    r.submissionId?.$oid === sub._id,
+                );
+                const note = reco?.note_progression;
+
+                return (
                   <div
-                    key={a.id}
-                    onClick={() => navigate(`/student/resultats/${a.id}`)}
+                    key={sub._id}
+                    onClick={() => navigate(`/student/resultats/${sub._id}`)}
                     className='flex items-center justify-between px-[18px] py-3.5 hover:bg-[#f9f9f9] cursor-pointer transition-colors group'
                   >
                     <div>
-                      <p className='text-[13px] font-medium'>{a.matiere}</p>
+                      <p className='text-[13px] font-medium'>
+                        {sub.matiereId?.nom_matiere || "Matière"}
+                      </p>
                       <p className='text-[11px] text-[#888] mt-0.5'>
-                        {a.module}
+                        {sub.moduleId?.nom_module || "Module"} · {sub.semestre}
                       </p>
                     </div>
                     <div className='flex items-center gap-3'>
                       <span className='text-[11px] font-mono text-[#888]'>
-                        {a.date}
+                        {formatDate(sub.createdAt)}
                       </span>
-                      {/* Score badge */}
-                      <span
-                        className={`text-[11px] font-bold px-2 py-0.5 rounded-full
-                        ${
-                          a.score >= 75
-                            ? "bg-[#f0fdf4] text-[#22c55e]"
-                            : a.score >= 55
-                              ? "bg-amber-50 text-amber-600"
-                              : "bg-red-50 text-red-500"
-                        }`}
-                      >
-                        {a.score}%
-                      </span>
+                      {/* Badge score — affiché seulement si la recommendation existe */}
+                      {note !== undefined && note !== null ? (
+                        <span
+                          className={`text-[11px] font-bold px-2 py-0.5 rounded-full
+                          ${
+                            note >= 75
+                              ? "bg-[#f0fdf4] text-[#22c55e]"
+                              : note >= 50
+                                ? "bg-amber-50 text-amber-600"
+                                : "bg-red-50 text-red-500"
+                          }`}
+                        >
+                          {note}%
+                        </span>
+                      ) : (
+                        <span className='text-[11px] text-[#ccc]'>—</span>
+                      )}
                       <svg
                         className='w-3.5 h-3.5 text-[#ccc] group-hover:text-[#888] transition-colors'
                         viewBox='0 0 24 24'
@@ -184,10 +271,10 @@ export default function StudentDashboardPage() {
                       </svg>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>

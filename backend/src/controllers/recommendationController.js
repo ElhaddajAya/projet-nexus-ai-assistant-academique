@@ -54,11 +54,12 @@ const generate = async (req, res) =>
       ressources,
     });
 
-    // 4. Sauvegarder la recommandation avec chat_history vide au départ
+    // 4. Sauvegarder la recommandation avec note_progression et chat_history vide
     const recommendation = await Recommendation.create({
       submissionId,
       userId,
       analyse: result.analyse,
+      note_progression: result.note_progression,
       plan_travail: result.plan_travail,
       conseils_ia: result.conseils_ia,
       ressources_recommandees: result.ressources_recommandees,

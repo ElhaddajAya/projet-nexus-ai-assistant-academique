@@ -152,4 +152,30 @@ const updateMe = async (req, res) =>
     }
 };
 
-module.exports = { register, login, updateMe };
+// PUT /api/auth/change-password
+const changePassword = async (req, res) =>
+{
+    try
+    {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(req.user.id);
+
+        // Vérifier l'ancien mot de passe
+        const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+        if (!isMatch)
+        {
+            return res.status(400).json({ message: "Mot de passe actuel incorrect" });
+        }
+
+        // Hasher et sauvegarder le nouveau
+        user.passwordHash = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        res.status(200).json({ message: "Mot de passe modifié avec succès" });
+    } catch (error)
+    {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};
+
+module.exports = { register, login, updateMe, changePassword };

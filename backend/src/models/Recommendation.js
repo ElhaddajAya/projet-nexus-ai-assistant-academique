@@ -23,6 +23,17 @@ const recommendationSchema = new mongoose.Schema({
     desc: { type: String },
   }],
 
+  // Note de progression estimée par Groq (0-100)
+  // Représente le niveau estimé de l'étudiant dans la matière
+  // basé sur ses difficultés déclarées 
+  // (ex: proche de 100 = maîtrise avancée, proche de 0 = débutant)
+  note_progression: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: null,
+  },
+
   // Conseils — array de strings
   conseils_ia: [{ type: String }],
 
@@ -30,7 +41,7 @@ const recommendationSchema = new mongoose.Schema({
   ressources_recommandees: [{
     titre: { type: String },
     lien: { type: String },
-    type: { type: String },
+    type: { type: String }, // ex: "video", "document", "TP/TD"
   }],
 
   // Historique du chat de suivi avec Groq

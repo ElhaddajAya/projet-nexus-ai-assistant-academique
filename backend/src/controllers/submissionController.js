@@ -129,8 +129,28 @@ const getMySubmissions = async (req, res) =>
     }
 };
 
+// GET /api/submissions/recent — 10 dernières soumissions (admin)
+const getRecentSubmissions = async (req, res) =>
+{
+    try
+    {
+        const submissions = await Submission.find()
+            .populate("userId", "nom prenom")
+            .populate("filiereId", "nom_filiere code_filiere")
+            .populate("matiereId", "nom_matiere")
+            .sort({ createdAt: -1 })
+            .limit(10);
+
+        res.status(200).json(submissions);
+    } catch (error)
+    {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};
+
 module.exports = {
     getSubmissionById,
     createSubmission,
     getMySubmissions,
+    getRecentSubmissions
 };

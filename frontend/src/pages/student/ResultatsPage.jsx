@@ -4,6 +4,42 @@ import StudentTopbar from "../../components/student/StudentTopbar";
 import Pagination, { usePagination } from "../../components/Pagination";
 import api from "../../api/axios";
 
+// ─── Composant pour afficher les messages du chat avec formatage ──────────────
+// Groq retourne du texte avec des • et des \n — on les transforme en JSX lisible
+function ChatMessage({ text, role }) {
+  // Séparer le texte en lignes
+  const lines = text.split("\n").filter((l) => l.trim() !== "");
+
+  // Rendu de chaque ligne selon son contenu
+  const renderLine = (line, i) => {
+    const trimmed = line.trim();
+
+    // Ligne bullet point — commence par • ou -
+    if (trimmed.startsWith("•") || trimmed.startsWith("-")) {
+      const content = trimmed.replace(/^[•\-]\s*/, "");
+      return (
+        <div key={i} className="flex gap-2 items-start">
+          <span className={`mt-[3px] shrink-0 text-[10px] ${role === "user" ? "text-white/70" : "text-[#22c55e]"}`}>•</span>
+          <span className="leading-relaxed">{content}</span>
+        </div>
+      );
+    }
+
+    // Ligne normale — intro ou conclusion
+    return (
+      <p key={i} className="leading-relaxed">
+        {trimmed}
+      </p>
+    );
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5 text-[13px]">
+      {lines.map((line, i) => renderLine(line, i))}
+    </div>
+  );
+}
+
 // ─── Styles des types de ressources ──────────────────────────────────────────
 const TYPE_STYLE = {
   doc:        { label: "DOC",   cls: "bg-blue-100 text-blue-700"   },
@@ -344,9 +380,9 @@ export function ResultatDetailPage() {
             <div className="p-4 flex flex-col gap-3 max-h-[300px] overflow-y-auto">
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] px-3.5 py-2.5 rounded-xl text-[13px] leading-relaxed
+                  <div className={`max-w-[80%] px-3.5 py-2.5 rounded-xl
                     ${m.role === "user" ? "bg-[#111] text-white rounded-br-sm" : "bg-[#f9f9f9] border border-[#e8e8e8] text-[#111] rounded-bl-sm"}`}>
-                    {m.text}
+                    <ChatMessage text={m.text} role={m.role} />
                   </div>
                 </div>
               ))}

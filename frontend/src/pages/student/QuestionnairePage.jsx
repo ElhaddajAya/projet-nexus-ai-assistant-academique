@@ -234,7 +234,7 @@ export default function QuestionnairePage() {
   const navigate = useNavigate();
 
   // updateUser permet de mettre à jour le profil dans le Context + localStorage
-  const { updateUser } = useAuth();
+  const { updateUser, user } = useAuth();
 
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
@@ -247,8 +247,8 @@ export default function QuestionnairePage() {
   const [matieres, setMatieres] = useState([]);
 
   // ── Valeurs du formulaire ──
-  const [filiereId, setFiliereId] = useState("");
-  const [niveau, setNiveau] = useState("");
+  const [filiereId, setFiliereId] = useState(user?.filiereId || "");
+  const [niveau, setNiveau] = useState(user?.niveau || "");
   const [semestre, setSemestre] = useState("");
   const [moduleId, setModuleId] = useState("");
   const [matiereId, setMatiereId] = useState("");

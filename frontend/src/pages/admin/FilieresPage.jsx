@@ -3,6 +3,7 @@ import AdminTopbar from "../../components/admin/AdminTopbar";
 import { RowActions } from "../../components/admin/RowActions";
 import SearchInput from "../../components/admin/SearchInput";
 import FiliereModal from "../../components/admin/modals/FiliereModal";
+import Pagination, { usePagination } from "../../components/Pagination";
 import api from "../../api/axios";
 
 export default function FilieresPage() {
@@ -12,7 +13,6 @@ export default function FilieresPage() {
   const [modalOpen, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
 
-  // ── Charger toutes les filières ──────────────────────────────────────────────
   const fetchFilieres = async () => {
     try {
       const res = await api.get("/filieres");
@@ -31,17 +31,18 @@ export default function FilieresPage() {
     (f.code_filiere ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
-  // ── Ajouter ou modifier ──────────────────────────────────────────────────────
+  // Pagination — reset à la page 1 quand la recherche change
+  const { page, setPage, paginated, totalPages } = usePagination(filtered, 8);
+  useEffect(() => { setPage(1); }, [search]);
+
   async function handleSave(item) {
     try {
       if (editing) {
-        // PUT /api/filieres/:id
         await api.put(`/filieres/${item._id}`, {
           nom_filiere:  item.nom_filiere,
           code_filiere: item.code_filiere,
         });
       } else {
-        // POST /api/filieres
         await api.post("/filieres", {
           nom_filiere:  item.nom_filiere,
           code_filiere: item.code_filiere,
@@ -55,7 +56,6 @@ export default function FilieresPage() {
     }
   }
 
-  // ── Supprimer ────────────────────────────────────────────────────────────────
   async function handleDelete(id) {
     if (!confirm("Supprimer cette filière ?")) return;
     try {
@@ -109,14 +109,14 @@ export default function FilieresPage() {
                     <div className="w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto" />
                   </td>
                 </tr>
-              ) : filtered.length === 0 ? (
+              ) : paginated.length === 0 ? (
                 <tr>
                   <td colSpan={3} className="text-center py-10 text-[13px] text-[#888]">
                     Aucune filière trouvée
                   </td>
                 </tr>
               ) : (
-                filtered.map((f) => (
+                paginated.map((f) => (
                   <tr key={f._id} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group">
                     <td className="px-[18px] py-3 text-[13px] font-medium">{f.nom_filiere}</td>
                     <td className="px-[18px] py-3 text-[12px] font-mono text-[#888]">{f.code_filiere}</td>
@@ -131,6 +131,9 @@ export default function FilieresPage() {
               )}
             </tbody>
           </table>
+
+          {/* Pagination */}
+          <Pagination page={page} total={totalPages} onChange={setPage} />
         </div>
       </div>
 

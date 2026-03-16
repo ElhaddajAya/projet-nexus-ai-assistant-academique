@@ -15,7 +15,7 @@ const generateRecommendation = async ({
         : "Aucune ressource disponible.";
 
     // System prompt — force une réponse JSON pure
-    const systemPrompt = `Tu es OrientAI, un assistant académique expert pour les étudiants de l'EMSI.
+    const systemPrompt = `Tu es OrientAI, un assistant académique expert pour les étudiants de l'école marocaine des sciences de l'ingénieur (EMSI).
     Tu réponds TOUJOURS et UNIQUEMENT avec un objet JSON valide.
     Tu ne mets JAMAIS de texte avant ou après le JSON.
     Tu ne mets JAMAIS de balises markdown comme \`\`\`json.
@@ -50,7 +50,7 @@ const generateRecommendation = async ({
     "conseils_ia" : 4 à 5 conseils pratiques, spécifiques aux difficultés déclarées,
       chaque conseil doit être directement applicable et pas générique.
 
-    "ressources_recommandees" : Sélectionne UNIQUEMENT parmi les ressources disponibles listées.
+    "ressources_recommandees" : Sélectionne UNIQUEMENT parmi les ressources disponibles listées (types disponibles : document, TP/TD, video, site web).
       Ne génère pas de fausses ressources.
 
     {
@@ -93,7 +93,7 @@ const generateRecommendation = async ({
         {
           "titre": "Titre exact depuis la liste disponible",
           "lien": "https://lien-exact-depuis-la-liste",
-          "type": "document"
+          "type": "... (document, video, tp/td, site web)"
         }
       ]
     }

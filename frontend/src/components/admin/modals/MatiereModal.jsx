@@ -3,35 +3,44 @@ import BaseModal, { Field, inputClass, selectClass } from "./BaseModal";
 import api from "../../../api/axios";
 
 export default function MatiereModal({ open, onClose, onSave, initial }) {
-  const [nom_matiere, setNomMatiere] = useState("");
-  const [module,      setModule]     = useState("");
-  const [difficultes, setDiffs]      = useState("");
+  const [nom_matiere, setNom]    = useState("");
+  const [moduleId,    setModule] = useState("");
+  const [difficultes, setDiffs]  = useState("");
 
-  // ── Vrais modules depuis l'API ───────────────────────────────────────────────
+  // Vrais modules depuis l'API
   const [modules, setModules] = useState([]);
 
   useEffect(() => {
-    api
-      .get("/modules")
+    api.get("/modules")
       .then((res) => setModules(res.data))
       .catch(console.error);
-  }, []); // chargé une seule fois au montage
+  }, []);
 
-  // ── Pré-remplir si édition, vider si ajout ───────────────────────────────────
   useEffect(() => {
     if (initial) {
-      setNomMatiere(initial.nom_matiere ?? "");
-      // Supporte objet populé { _id, nom } ou string simple
-      setModule(initial.module?._id ?? initial.module ?? "");
-      setDiffs(initial.difficultes || "");
+      setNom(initial.nom_matiere ?? "");
+      // moduleId peut être un objet populé { _id, nom_module } ou un string _id
+      setModule(initial.moduleId?._id ?? initial.moduleId ?? "");
+      // difficultes est un array dans le backend, on l'affiche une par ligne
+      setDiffs(
+        Array.isArray(initial.difficultes)
+          ? initial.difficultes.join("\n")
+          : initial.difficultes || ""
+      );
     } else {
-      setNomMatiere(""); setModule(""); setDiffs("");
+      setNom(""); setModule(""); setDiffs("");
     }
   }, [initial, open]);
 
   function handleSubmit() {
-    if (!nom_matiere.trim() || !module) return;
-    onSave({ ...initial, nom_matiere: nom_matiere.trim(), module, difficultes: difficultes.trim() });
+    if (!nom_matiere.trim() || !moduleId) return;
+    // difficultes : convertir le texte en array (une difficulté par ligne)
+    const diffsArray = difficultes
+      .split("\n")
+      .map((d) => d.trim())
+      .filter(Boolean);
+
+    onSave({ ...initial, nom_matiere: nom_matiere.trim(), moduleId, difficultes: diffsArray });
   }
 
   return (
@@ -41,16 +50,10 @@ export default function MatiereModal({ open, onClose, onSave, initial }) {
       title={initial ? "Modifier la matière" : "Ajouter une matière"}
       footer={
         <>
-          <button
-            onClick={onClose}
-            className="px-3.5 py-[7px] rounded-lg border border-[#e8e8e8] text-[12px] font-medium text-[#888] hover:border-[#bbb] hover:text-[#111] transition-colors"
-          >
+          <button onClick={onClose} className="px-3.5 py-[7px] rounded-lg border border-[#e8e8e8] text-[12px] font-medium text-[#888] hover:border-[#bbb] hover:text-[#111] transition-colors">
             Annuler
           </button>
-          <button
-            onClick={handleSubmit}
-            className="px-3.5 py-[7px] rounded-lg bg-[#111] text-white text-[12px] font-medium hover:bg-[#333] transition-colors"
-          >
+          <button onClick={handleSubmit} className="px-3.5 py-[7px] rounded-lg bg-[#111] text-white text-[12px] font-medium hover:bg-[#333] transition-colors">
             Enregistrer
           </button>
         </>
@@ -60,7 +63,7 @@ export default function MatiereModal({ open, onClose, onSave, initial }) {
         <input
           className={inputClass}
           value={nom_matiere}
-          onChange={(e) => setNomMatiere(e.target.value)}
+          onChange={(e) => setNom(e.target.value)}
           placeholder="Ex : Conception UML"
         />
       </Field>
@@ -69,13 +72,13 @@ export default function MatiereModal({ open, onClose, onSave, initial }) {
       <Field label="Module">
         <select
           className={selectClass}
-          value={module}
+          value={moduleId}
           onChange={(e) => setModule(e.target.value)}
         >
           <option value="" disabled>Choisir un module…</option>
           {modules.map((m) => (
             <option key={m._id} value={m._id}>
-              {m.nom}
+              {m.nom_module}
             </option>
           ))}
         </select>

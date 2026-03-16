@@ -3,15 +3,14 @@ import AdminTopbar from "../../components/admin/AdminTopbar";
 import { RowActions } from "../../components/admin/RowActions";
 import SearchInput from "../../components/admin/SearchInput";
 import FiliereModal from "../../components/admin/modals/FiliereModal";
-import api from "../../api/axios"; // src/api/axios.js → depuis pages/admin/ : ../../api/axios
+import api from "../../api/axios";
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function FilieresPage() {
   const [data, setData]       = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
   const [modalOpen, setModal] = useState(false);
-  const [editing, setEditing] = useState(null); // null = ajout, objet = édition
+  const [editing, setEditing] = useState(null);
 
   // ── Charger toutes les filières ──────────────────────────────────────────────
   const fetchFilieres = async () => {
@@ -25,15 +24,11 @@ export default function FilieresPage() {
     }
   };
 
-  useEffect(() => {
-    fetchFilieres();
-  }, []);
+  useEffect(() => { fetchFilieres(); }, []);
 
-  // ── Filtre de recherche ──────────────────────────────────────────────────────
-  const filtered = data.filter(
-    (f) =>
-      f.nom_filiere.toLowerCase().includes(search.toLowerCase()) ||
-      f.code.toLowerCase().includes(search.toLowerCase()),
+  const filtered = data.filter((f) =>
+    (f.nom_filiere  ?? "").toLowerCase().includes(search.toLowerCase()) ||
+    (f.code_filiere ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
   // ── Ajouter ou modifier ──────────────────────────────────────────────────────
@@ -42,19 +37,19 @@ export default function FilieresPage() {
       if (editing) {
         // PUT /api/filieres/:id
         await api.put(`/filieres/${item._id}`, {
-          nom_filiere: item.nom_filiere,
-          code: item.code,
+          nom_filiere:  item.nom_filiere,
+          code_filiere: item.code_filiere,
         });
       } else {
         // POST /api/filieres
         await api.post("/filieres", {
-          nom_filiere: item.nom_filiere,
-          code: item.code,
+          nom_filiere:  item.nom_filiere,
+          code_filiere: item.code_filiere,
         });
       }
       setModal(false);
       setEditing(null);
-      await fetchFilieres(); // Rafraîchit la liste après sauvegarde
+      await fetchFilieres();
     } catch (err) {
       alert("Erreur : " + (err.response?.data?.message || err.message));
     }
@@ -65,7 +60,7 @@ export default function FilieresPage() {
     if (!confirm("Supprimer cette filière ?")) return;
     try {
       await api.delete(`/filieres/${id}`);
-      await fetchFilieres(); // Rafraîchit la liste après suppression
+      await fetchFilieres();
     } catch (err) {
       alert("Erreur lors de la suppression : " + (err.response?.data?.message || err.message));
     }
@@ -77,11 +72,8 @@ export default function FilieresPage() {
         title="Filières"
         subtitle={`${data.length} filières configurées`}
       />
-
       <div className="p-7">
         <div className="border border-[#e8e8e8] rounded-xl overflow-hidden">
-
-          {/* Card header */}
           <div className="px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between">
             <div>
               <h3 className="text-[13px] font-semibold">Toutes les filières</h3>
@@ -100,15 +92,11 @@ export default function FilieresPage() {
             </div>
           </div>
 
-          {/* Table */}
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-[#e8e8e8]">
-                {["Nom de la filière", "Code", "Modules", "Étudiants", ""].map((h) => (
-                  <th
-                    key={h}
-                    className="px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]"
-                  >
+                {["Nom de la filière", "Code", ""].map((h) => (
+                  <th key={h} className="px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]">
                     {h}
                   </th>
                 ))}
@@ -117,30 +105,21 @@ export default function FilieresPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-10">
+                  <td colSpan={3} className="text-center py-10">
                     <div className="w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto" />
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-10 text-[13px] text-[#888]">
+                  <td colSpan={3} className="text-center py-10 text-[13px] text-[#888]">
                     Aucune filière trouvée
                   </td>
                 </tr>
               ) : (
                 filtered.map((f) => (
-                  <tr
-                    key={f._id}
-                    className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group"
-                  >
-                    <td className="px-[18px] py-3 text-[13px] font-medium">{f.nom}</td>
-                    <td className="px-[18px] py-3 text-[12px] font-mono text-[#888]">{f.code}</td>
-                    <td className="px-[18px] py-3 text-[12px] text-[#888]">
-                      {f.modules ?? 0} modules
-                    </td>
-                    <td className="px-[18px] py-3 text-[12px] text-[#888]">
-                      {f.etudiants ?? 0}
-                    </td>
+                  <tr key={f._id} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group">
+                    <td className="px-[18px] py-3 text-[13px] font-medium">{f.nom_filiere}</td>
+                    <td className="px-[18px] py-3 text-[12px] font-mono text-[#888]">{f.code_filiere}</td>
                     <td className="px-[18px] py-3">
                       <RowActions
                         onEdit={() => { setEditing(f); setModal(true); }}
@@ -152,11 +131,9 @@ export default function FilieresPage() {
               )}
             </tbody>
           </table>
-
         </div>
       </div>
 
-      {/* Modal */}
       <FiliereModal
         open={modalOpen}
         onClose={() => { setModal(false); setEditing(null); }}

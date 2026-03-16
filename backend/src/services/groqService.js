@@ -35,7 +35,7 @@ const generateRecommendation = async ({
     ${ressourcesText}
 
     Génère une réponse avec EXACTEMENT cette structure JSON.
-    Respecte les types : analyse est une string, plan_travail est un array d'objets, conseils_ia est un array de strings, ressources_recommandees (selon les ressources disponibles) est un array d'objets.
+    Respecte les types : analyse est une string, plan_travail est un array d'objets, conseils_ia est un array de strings, ressources_recommandees (selon les ressources disponibles) est un array d'objets avec titre, lien et type (document, video, TP/TD, site web).
 
     {
     "analyse": "2 à 3 phrases décrivant le profil académique de l'étudiant, ses difficultés principales et ses points forts",

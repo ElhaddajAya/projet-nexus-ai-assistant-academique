@@ -6,81 +6,133 @@ import SearchInput from "../../components/admin/SearchInput";
 import ModuleModal from "../../components/admin/modals/ModuleModal";
 import api from "../../api/axios";
 
-const INIT_MODULES = [
-  { _id:"1", nom:"Génie Logiciel",              filiere:"4IIR", semestre:"S6", matieres:4 },
-  { _id:"2", nom:"Intelligence Artificielle",   filiere:"4IIR", semestre:"S6", matieres:3 },
-  { _id:"3", nom:"Algorithmique avancée",        filiere:"4IIR", semestre:"S5", matieres:3 },
-  { _id:"4", nom:"Réseaux & Sécurité",          filiere:"4IIR", semestre:"S5", matieres:3 },
-  { _id:"5", nom:"Développement Web & Mobile",  filiere:"4IIR", semestre:"S6", matieres:3 },
-  { _id:"6", nom:"Béton armé",                  filiere:"GC",   semestre:"S5", matieres:2 },
-];
-
 export function ModulesPage() {
-  const [data, setData]       = useState(INIT_MODULES);
+  const [data, setData]       = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
   const [modalOpen, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
 
-  const filtered = data.filter((m) =>
-    m.nom.toLowerCase().includes(search.toLowerCase()) ||
-    m.filiere.toLowerCase().includes(search.toLowerCase())
+  // ── Charger tous les modules ─────────────────────────────────────────────────
+  const fetchModules = async () => {
+    try {
+      const res = await api.get("/modules");
+      setData(res.data);
+    } catch (err) {
+      console.error("Erreur chargement modules :", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchModules(); }, []);
+
+  const filtered = data.filter(
+    (m) =>
+      (m.nom ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (m.filiere?.nom_filiere ?? m.filiere?.nom ?? m.filiere ?? "").toLowerCase().includes(search.toLowerCase()),
   );
 
-  function handleSave(item) {
-    if (editing) setData((d) => d.map((m) => (m._id === item._id ? item : m)));
-    else setData((d) => [...d, { ...item, _id: Date.now().toString(), matieres: 0 }]);
-    setModal(false); setEditing(null);
+  // ── Ajouter ou modifier ──────────────────────────────────────────────────────
+  async function handleSave(item) {
+    try {
+      if (editing) {
+        await api.put(`/modules/${item._id}`, {
+          nom:      item.nom,
+          semestre: item.semestre,
+          filiere:  item.filiere,
+        });
+      } else {
+        await api.post("/modules", {
+          nom:      item.nom,
+          semestre: item.semestre,
+          filiere:  item.filiere,
+        });
+      }
+      setModal(false);
+      setEditing(null);
+      await fetchModules();
+    } catch (err) {
+      alert("Erreur : " + (err.response?.data?.message || err.message));
+    }
   }
 
-  function handleDelete(id) {
-    if (confirm("Supprimer ce module ?")) setData((d) => d.filter((m) => m._id !== id));
+  // ── Supprimer ────────────────────────────────────────────────────────────────
+  async function handleDelete(id) {
+    if (!confirm("Supprimer ce module ?")) return;
+    try {
+      await api.delete(`/modules/${id}`);
+      await fetchModules();
+    } catch (err) {
+      alert("Erreur lors de la suppression : " + (err.response?.data?.message || err.message));
+    }
   }
 
   return (
     <>
-      <AdminTopbar title="Modules" subtitle={`${data.length} modules configurés`} />
-      <div className="p-7">
-        <div className="border border-[#e8e8e8] rounded-xl overflow-hidden">
-          <div className="px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between">
+      <AdminTopbar title='Modules' subtitle={`${data.length} modules configurés`} />
+      <div className='p-7'>
+        <div className='border border-[#e8e8e8] rounded-xl overflow-hidden'>
+          <div className='px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between'>
             <div>
-              <h3 className="text-[13px] font-semibold">Tous les modules</h3>
-              <p className="text-[11px] text-[#888] mt-0.5">{filtered.length} résultat{filtered.length > 1 ? "s" : ""}</p>
+              <h3 className='text-[13px] font-semibold'>Tous les modules</h3>
+              <p className='text-[11px] text-[#888] mt-0.5'>
+                {filtered.length} résultat{filtered.length > 1 ? "s" : ""}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               <SearchInput value={search} onChange={setSearch} />
-              <button onClick={() => { setEditing(null); setModal(true); }}
-                className="flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors">
+              <button
+                onClick={() => { setEditing(null); setModal(true); }}
+                className='flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors'
+              >
                 + Ajouter
               </button>
             </div>
           </div>
-          <table className="w-full border-collapse">
+          <table className='w-full border-collapse'>
             <thead>
-              <tr className="border-b border-[#e8e8e8]">
-                {["Nom du module","Filière","Semestre","Matières",""].map((h) => (
-                  <th key={h} className="px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]">{h}</th>
+              <tr className='border-b border-[#e8e8e8]'>
+                {["Nom du module", "Filière", "Semestre", "Matières", ""].map((h) => (
+                  <th key={h} className='px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]'>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-10 text-[13px] text-[#888]">Aucun module trouvé</td></tr>
-              ) : filtered.map((m) => (
-                <tr key={m._id} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group">
-                  <td className="px-[18px] py-3 text-[13px] font-medium">{m.nom}</td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888]">{m.filiere}</td>
-                  <td className="px-[18px] py-3 text-[12px] font-mono text-[#888]">{m.semestre}</td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888]">{m.matieres} matières</td>
-                  <td className="px-[18px] py-3">
-                    <RowActions onEdit={() => { setEditing(m); setModal(true); }} onDelete={() => handleDelete(m._id)} />
-                  </td>
-                </tr>
-              ))}
+              {loading ? (
+                <tr><td colSpan={5} className='text-center py-10'>
+                  <div className='w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto' />
+                </td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={5} className='text-center py-10 text-[13px] text-[#888]'>Aucun module trouvé</td></tr>
+              ) : (
+                filtered.map((m) => (
+                  <tr key={m._id} className='border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group'>
+                    <td className='px-[18px] py-3 text-[13px] font-medium'>{m.nom}</td>
+                    <td className='px-[18px] py-3 text-[12px] text-[#888]'>
+                      {m.filiere?.nom_filiere ?? m.filiere?.nom ?? m.filiere ?? "—"}
+                    </td>
+                    <td className='px-[18px] py-3 text-[12px] font-mono text-[#888]'>{m.semestre}</td>
+                    <td className='px-[18px] py-3 text-[12px] text-[#888]'>{m.matieres ?? 0} matières</td>
+                    <td className='px-[18px] py-3'>
+                      <RowActions
+                        onEdit={() => { setEditing(m); setModal(true); }}
+                        onDelete={() => handleDelete(m._id)}
+                      />
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
-      <ModuleModal open={modalOpen} onClose={() => { setModal(false); setEditing(null); }} onSave={handleSave} initial={editing} />
+      <ModuleModal
+        open={modalOpen}
+        onClose={() => { setModal(false); setEditing(null); }}
+        onSave={handleSave}
+        initial={editing}
+      />
     </>
   );
 }
@@ -88,81 +140,131 @@ export function ModulesPage() {
 // ─── MatieresPage ─────────────────────────────────────────────────────────────
 import MatiereModal from "../../components/admin/modals/MatiereModal";
 
-const INIT_MATIERES = [
-  { _id:"1", nom:"Conception UML",       module:"Génie Logiciel",            difficultes:"5 difficultés", ressources:3 },
-  { _id:"2", nom:"Design Patterns",      module:"Génie Logiciel",            difficultes:"4 difficultés", ressources:2 },
-  { _id:"3", nom:"Machine Learning",     module:"Intelligence Artificielle",  difficultes:"6 difficultés", ressources:4 },
-  { _id:"4", nom:"Protocoles TCP/IP",    module:"Réseaux & Sécurité",        difficultes:"4 difficultés", ressources:2 },
-  { _id:"5", nom:"React JS",             module:"Développement Web & Mobile", difficultes:"5 difficultés", ressources:3 },
-  { _id:"6", nom:"Structures de données",module:"Algorithmique avancée",     difficultes:"3 difficultés", ressources:2 },
-];
-
 export function MatieresPage() {
-  const [data, setData]       = useState(INIT_MATIERES);
+  const [data, setData]       = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
   const [modalOpen, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
 
-  const filtered = data.filter((m) =>
-    m.nom.toLowerCase().includes(search.toLowerCase()) ||
-    m.module.toLowerCase().includes(search.toLowerCase())
+  // ── Charger toutes les matières ──────────────────────────────────────────────
+  const fetchMatieres = async () => {
+    try {
+      const res = await api.get("/matieres");
+      setData(res.data);
+    } catch (err) {
+      console.error("Erreur chargement matières :", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchMatieres(); }, []);
+
+  const filtered = data.filter(
+    (m) =>
+      (m.nom_matiere ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (m.module?.nom ?? m.module ?? "").toLowerCase().includes(search.toLowerCase()),
   );
 
-  function handleSave(item) {
-    if (editing) setData((d) => d.map((m) => (m._id === item._id ? item : m)));
-    else setData((d) => [...d, { ...item, _id: Date.now().toString(), ressources: 0 }]);
-    setModal(false); setEditing(null);
+  // ── Ajouter ou modifier ──────────────────────────────────────────────────────
+  async function handleSave(item) {
+    try {
+      if (editing) {
+        await api.put(`/matieres/${item._id}`, {
+          nom_matiere: item.nom_matiere,
+          module:      item.module,
+        });
+      } else {
+        await api.post("/matieres", {
+          nom_matiere: item.nom_matiere,
+          module:      item.module,
+        });
+      }
+      setModal(false);
+      setEditing(null);
+      await fetchMatieres();
+    } catch (err) {
+      alert("Erreur : " + (err.response?.data?.message || err.message));
+    }
   }
 
-  function handleDelete(id) {
-    if (confirm("Supprimer cette matière ?")) setData((d) => d.filter((m) => m._id !== id));
+  // ── Supprimer ────────────────────────────────────────────────────────────────
+  async function handleDelete(id) {
+    if (!confirm("Supprimer cette matière ?")) return;
+    try {
+      await api.delete(`/matieres/${id}`);
+      await fetchMatieres();
+    } catch (err) {
+      alert("Erreur lors de la suppression : " + (err.response?.data?.message || err.message));
+    }
   }
 
   return (
     <>
-      <AdminTopbar title="Matières" subtitle={`${data.length} matières configurées`} />
-      <div className="p-7">
-        <div className="border border-[#e8e8e8] rounded-xl overflow-hidden">
-          <div className="px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between">
+      <AdminTopbar title='Matières' subtitle={`${data.length} matières configurées`} />
+      <div className='p-7'>
+        <div className='border border-[#e8e8e8] rounded-xl overflow-hidden'>
+          <div className='px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between'>
             <div>
-              <h3 className="text-[13px] font-semibold">Toutes les matières</h3>
-              <p className="text-[11px] text-[#888] mt-0.5">{filtered.length} résultat{filtered.length > 1 ? "s" : ""}</p>
+              <h3 className='text-[13px] font-semibold'>Toutes les matières</h3>
+              <p className='text-[11px] text-[#888] mt-0.5'>
+                {filtered.length} résultat{filtered.length > 1 ? "s" : ""}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               <SearchInput value={search} onChange={setSearch} />
-              <button onClick={() => { setEditing(null); setModal(true); }}
-                className="flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors">
+              <button
+                onClick={() => { setEditing(null); setModal(true); }}
+                className='flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors'
+              >
                 + Ajouter
               </button>
             </div>
           </div>
-          <table className="w-full border-collapse">
+          <table className='w-full border-collapse'>
             <thead>
-              <tr className="border-b border-[#e8e8e8]">
-                {["Nom de la matière","Module","Difficultés","Ressources",""].map((h) => (
-                  <th key={h} className="px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]">{h}</th>
+              <tr className='border-b border-[#e8e8e8]'>
+                {["Nom de la matière", "Module", "Difficultés", "Ressources", ""].map((h) => (
+                  <th key={h} className='px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]'>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-10 text-[13px] text-[#888]">Aucune matière trouvée</td></tr>
-              ) : filtered.map((m) => (
-                <tr key={m._id} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group">
-                  <td className="px-[18px] py-3 text-[13px] font-medium">{m.nom}</td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888]">{m.module}</td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888]">{m.difficultes}</td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888]">{m.ressources} ressources</td>
-                  <td className="px-[18px] py-3">
-                    <RowActions onEdit={() => { setEditing(m); setModal(true); }} onDelete={() => handleDelete(m._id)} />
-                  </td>
-                </tr>
-              ))}
+              {loading ? (
+                <tr><td colSpan={5} className='text-center py-10'>
+                  <div className='w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto' />
+                </td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={5} className='text-center py-10 text-[13px] text-[#888]'>Aucune matière trouvée</td></tr>
+              ) : (
+                filtered.map((m) => (
+                  <tr key={m._id} className='border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group'>
+                    <td className='px-[18px] py-3 text-[13px] font-medium'>{m.nom_matiere}</td>
+                    <td className='px-[18px] py-3 text-[12px] text-[#888]'>
+                      {m.module?.nom ?? m.module ?? "—"}
+                    </td>
+                    <td className='px-[18px] py-3 text-[12px] text-[#888]'>{m.difficultes ?? "—"}</td>
+                    <td className='px-[18px] py-3 text-[12px] text-[#888]'>{m.ressources ?? 0} ressources</td>
+                    <td className='px-[18px] py-3'>
+                      <RowActions
+                        onEdit={() => { setEditing(m); setModal(true); }}
+                        onDelete={() => handleDelete(m._id)}
+                      />
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
-      <MatiereModal open={modalOpen} onClose={() => { setModal(false); setEditing(null); }} onSave={handleSave} initial={editing} />
+      <MatiereModal
+        open={modalOpen}
+        onClose={() => { setModal(false); setEditing(null); }}
+        onSave={handleSave}
+        initial={editing}
+      />
     </>
   );
 }
@@ -171,19 +273,19 @@ export function MatieresPage() {
 import RessourceModal from "../../components/admin/modals/RessourceModal";
 
 export function RessourcesPage() {
-  const [data,      setData]    = useState([]);
-  const [search,    setSearch]  = useState("");
-  const [modalOpen, setModal]   = useState(false);
-  const [editing,   setEditing] = useState(null);
-  const [loading,   setLoading] = useState(true);
+  const [data, setData]       = useState([]);
+  const [search, setSearch]   = useState("");
+  const [modalOpen, setModal] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const TYPE_STYLES = {
-    video:    { label: "Vidéo",    class: "bg-red-100 text-red-700"     },
-    document: { label: "Document", class: "bg-blue-100 text-blue-700"   },
-    "TP/TD":  { label: "TP / TD",  class: "bg-amber-100 text-amber-700" },
+    video:      { label: "Vidéo",    class: "bg-red-100 text-red-700"    },
+    document:   { label: "Document", class: "bg-blue-100 text-blue-700"  },
+    "TP/TD":    { label: "TP / TD",  class: "bg-amber-100 text-amber-700"},
+    "site web": { label: "Site web", class: "bg-green-100 text-green-700"},
   };
 
-  // Charger toutes les ressources depuis l'API
   useEffect(() => {
     api.get("/ressources")
       .then((res) => setData(res.data))
@@ -192,32 +294,23 @@ export function RessourcesPage() {
   }, []);
 
   const filtered = data.filter((r) =>
-    r.titre.toLowerCase().includes(search.toLowerCase())
+    r.titre.toLowerCase().includes(search.toLowerCase()),
   );
 
-  // Créer ou mettre à jour
   async function handleSave(item) {
     try {
       if (editing) {
         const res = await api.put(`/ressources/${item._id}`, {
-          titre:       item.titre,
-          description: item.description || "",
-          lien:        item.lien,
-          type:        item.type,
-          matiereId:   item.matiereId,
-          filiereId:   item.filiereId,
-          niveau:      item.niveau || "",
+          titre: item.titre, description: item.description || "",
+          lien: item.lien, type: item.type,
+          matiereId: item.matiereId, filiereId: item.filiereId, niveau: item.niveau || "",
         });
         setData((d) => d.map((r) => (r._id === item._id ? res.data : r)));
       } else {
         const res = await api.post("/ressources", {
-          titre:       item.titre,
-          description: item.description || "",
-          lien:        item.lien,
-          type:        item.type,
-          matiereId:   item.matiereId,
-          filiereId:   item.filiereId,
-          niveau:      item.niveau || "",
+          titre: item.titre, description: item.description || "",
+          lien: item.lien, type: item.type,
+          matiereId: item.matiereId, filiereId: item.filiereId, niveau: item.niveau || "",
         });
         setData((d) => [...d, res.data]);
       }
@@ -228,7 +321,6 @@ export function RessourcesPage() {
     }
   }
 
-  // Supprimer
   async function handleDelete(id) {
     if (!confirm("Supprimer cette ressource ?")) return;
     try {
@@ -241,58 +333,61 @@ export function RessourcesPage() {
 
   return (
     <>
-      <AdminTopbar title="Ressources" subtitle={`${data.length} ressources disponibles`} />
-      <div className="p-7">
-        <div className="border border-[#e8e8e8] rounded-xl overflow-hidden">
-          <div className="px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between">
+      <AdminTopbar title='Ressources' subtitle={`${data.length} ressources disponibles`} />
+      <div className='p-7'>
+        <div className='border border-[#e8e8e8] rounded-xl overflow-hidden'>
+          <div className='px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between'>
             <div>
-              <h3 className="text-[13px] font-semibold">Toutes les ressources</h3>
-              <p className="text-[11px] text-[#888] mt-0.5">{filtered.length} résultat{filtered.length > 1 ? "s" : ""}</p>
+              <h3 className='text-[13px] font-semibold'>Toutes les ressources</h3>
+              <p className='text-[11px] text-[#888] mt-0.5'>
+                {filtered.length} résultat{filtered.length > 1 ? "s" : ""}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               <SearchInput value={search} onChange={setSearch} />
               <button
                 onClick={() => { setEditing(null); setModal(true); }}
-                className="flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors">
+                className='flex items-center gap-1.5 px-3.5 py-[7px] bg-[#111] text-white text-[12px] font-medium rounded-lg hover:bg-[#333] transition-colors'
+              >
                 + Ajouter
               </button>
             </div>
           </div>
-          <table className="w-full border-collapse">
+          <table className='w-full border-collapse'>
             <thead>
-              <tr className="border-b border-[#e8e8e8]">
+              <tr className='border-b border-[#e8e8e8]'>
                 {["Titre", "Type", "Lien", ""].map((h) => (
-                  <th key={h} className="px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]">{h}</th>
+                  <th key={h} className='px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]'>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-10">
-                    <div className="w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto"/>
-                  </td>
-                </tr>
+                <tr><td colSpan={4} className='text-center py-10'>
+                  <div className='w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto' />
+                </td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={4} className="text-center py-10 text-[13px] text-[#888]">Aucune ressource trouvée</td></tr>
-              ) : filtered.map((r) => {
-                const t = TYPE_STYLES[r.type] || TYPE_STYLES["document"];
-                return (
-                  <tr key={r._id} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group">
-                    <td className="px-[18px] py-3 text-[13px] font-medium">{r.titre}</td>
-                    <td className="px-[18px] py-3">
-                      <span className={`text-[9px] font-bold px-2 py-1 rounded ${t.class}`}>{t.label}</span>
-                    </td>
-                    <td className="px-[18px] py-3 text-[12px] font-mono text-[#888] max-w-[160px] truncate">{r.lien}</td>
-                    <td className="px-[18px] py-3">
-                      <RowActions
-                        onEdit={() => { setEditing(r); setModal(true); }}
-                        onDelete={() => handleDelete(r._id)}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
+                <tr><td colSpan={4} className='text-center py-10 text-[13px] text-[#888]'>Aucune ressource trouvée</td></tr>
+              ) : (
+                filtered.map((r) => {
+                  const t = TYPE_STYLES[r.type] || TYPE_STYLES["document"];
+                  return (
+                    <tr key={r._id} className='border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group'>
+                      <td className='px-[18px] py-3 text-[13px] font-medium'>{r.titre}</td>
+                      <td className='px-[18px] py-3'>
+                        <span className={`text-[9px] font-bold px-2 py-1 rounded ${t.class}`}>{t.label}</span>
+                      </td>
+                      <td className='px-[18px] py-3 text-[12px] font-mono text-[#888] max-w-[160px] truncate'>{r.lien}</td>
+                      <td className='px-[18px] py-3'>
+                        <RowActions
+                          onEdit={() => { setEditing(r); setModal(true); }}
+                          onDelete={() => handleDelete(r._id)}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -309,11 +404,10 @@ export function RessourcesPage() {
 
 // ─── SoumissionsPage ─── CONNECTÉE AU BACKEND ─────────────────────────────────
 export function SoumissionsPage() {
-  const [data,    setData]    = useState([]);
-  const [search,  setSearch]  = useState("");
+  const [data, setData]       = useState([]);
+  const [search, setSearch]   = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Charger les soumissions de l'utilisateur connecté
   useEffect(() => {
     api.get("/submissions/me")
       .then((res) => setData(res.data))
@@ -322,55 +416,55 @@ export function SoumissionsPage() {
   }, []);
 
   const filtered = data.filter((s) =>
-    JSON.stringify(s).toLowerCase().includes(search.toLowerCase())
+    JSON.stringify(s).toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <>
-      <AdminTopbar title="Soumissions" subtitle="Historique des analyses générées" />
-      <div className="p-7">
-        <div className="border border-[#e8e8e8] rounded-xl overflow-hidden">
-          <div className="px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between">
+      <AdminTopbar title='Soumissions' subtitle='Historique des analyses générées' />
+      <div className='p-7'>
+        <div className='border border-[#e8e8e8] rounded-xl overflow-hidden'>
+          <div className='px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between'>
             <div>
-              <h3 className="text-[13px] font-semibold">Toutes les soumissions</h3>
-              <p className="text-[11px] text-[#888] mt-0.5">{data.length} soumission{data.length > 1 ? "s" : ""} au total</p>
+              <h3 className='text-[13px] font-semibold'>Toutes les soumissions</h3>
+              <p className='text-[11px] text-[#888] mt-0.5'>
+                {data.length} soumission{data.length > 1 ? "s" : ""} au total
+              </p>
             </div>
             <SearchInput value={search} onChange={setSearch} />
           </div>
-          <table className="w-full border-collapse">
+          <table className='w-full border-collapse'>
             <thead>
-              <tr className="border-b border-[#e8e8e8]">
+              <tr className='border-b border-[#e8e8e8]'>
                 {["Filière", "Semestre", "Difficultés", "Objectifs", "Date"].map((h) => (
-                  <th key={h} className="px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]">{h}</th>
+                  <th key={h} className='px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]'>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-10">
-                    <div className="w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto"/>
-                  </td>
-                </tr>
+                <tr><td colSpan={5} className='text-center py-10'>
+                  <div className='w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto' />
+                </td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-10 text-[13px] text-[#888]">Aucune soumission trouvée</td></tr>
-              ) : filtered.map((s) => (
-                <tr key={s._id} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors">
-                  <td className="px-[18px] py-3 text-[13px] font-medium">
-                    {s.filiereId?.nom_filiere || "—"}
-                  </td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888]">{s.semestre}</td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888] max-w-[180px] truncate">
-                    {Array.isArray(s.difficultes) ? s.difficultes.join(", ") : s.difficultes}
-                  </td>
-                  <td className="px-[18px] py-3 text-[12px] text-[#888] max-w-[180px] truncate">
-                    {Array.isArray(s.objectifs) ? s.objectifs.join(", ") : s.objectifs}
-                  </td>
-                  <td className="px-[18px] py-3 text-[12px] font-mono text-[#888]">
-                    {new Date(s.createdAt).toLocaleDateString("fr-FR")}
-                  </td>
-                </tr>
-              ))}
+                <tr><td colSpan={5} className='text-center py-10 text-[13px] text-[#888]'>Aucune soumission trouvée</td></tr>
+              ) : (
+                filtered.map((s) => (
+                  <tr key={s._id} className='border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors'>
+                    <td className='px-[18px] py-3 text-[13px] font-medium'>{s.filiereId?.nom_filiere || "—"}</td>
+                    <td className='px-[18px] py-3 text-[12px] text-[#888]'>{s.semestre}</td>
+                    <td className='px-[18px] py-3 text-[12px] text-[#888] max-w-[180px] truncate'>
+                      {Array.isArray(s.difficultes) ? s.difficultes.join(", ") : s.difficultes}
+                    </td>
+                    <td className='px-[18px] py-3 text-[12px] text-[#888] max-w-[180px] truncate'>
+                      {Array.isArray(s.objectifs) ? s.objectifs.join(", ") : s.objectifs}
+                    </td>
+                    <td className='px-[18px] py-3 text-[12px] font-mono text-[#888]'>
+                      {new Date(s.createdAt).toLocaleDateString("fr-FR")}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

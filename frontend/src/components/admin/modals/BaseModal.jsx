@@ -3,10 +3,11 @@ import { useEffect } from "react";
 // ─── Base modal wrapper ───────────────────────────────────────────────────────
 // Usage: wrap your modal content in this component
 export default function BaseModal({ open, onClose, title, children, footer }) {
-
   // Close on Escape key
   useEffect(() => {
-    function onKey(e) { if (e.key === "Escape") onClose(); }
+    function onKey(e) {
+      if (e.key === "Escape") onClose();
+    }
     if (open) document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
@@ -16,36 +17,53 @@ export default function BaseModal({ open, onClose, title, children, footer }) {
   return (
     // Overlay
     <div
-      className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center backdrop-blur-[2px]"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className='fixed inset-0 bg-black/30 z-50 flex items-center justify-center backdrop-blur-[2px]'
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       {/* Modal card */}
-      <div className="bg-white border border-[#e8e8e8] rounded-[14px] w-full max-w-[420px] overflow-hidden shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-150">
-
+      <div className='bg-white border border-[#e8e8e8] rounded-[14px] w-full max-w-[420px] max-h-[90vh] flex flex-col shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-150'>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#e8e8e8]">
-          <h3 className="text-[14px] font-semibold text-[#111]">{title}</h3>
+        <div className='flex items-center justify-between px-5 py-4 border-b border-[#e8e8e8]'>
+          <h3 className='text-[14px] font-semibold text-[#111]'>{title}</h3>
           <button
             onClick={onClose}
-            className="w-[26px] h-[26px] rounded-md border border-[#e8e8e8] flex items-center justify-center text-[#888] hover:bg-[#f9f9f9] hover:text-[#111] transition-colors"
+            className='w-[26px] h-[26px] rounded-md border border-[#e8e8e8] flex items-center justify-center text-[#888] hover:bg-[#f9f9f9] hover:text-[#111] transition-colors'
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+            <svg
+              width='13'
+              height='13'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='2'
+            >
+              <line
+                x1='18'
+                y1='6'
+                x2='6'
+                y2='18'
+              />
+              <line
+                x1='6'
+                y1='6'
+                x2='18'
+                y2='18'
+              />
             </svg>
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-5 py-5 flex flex-col gap-3.5">
+        <div className='px-5 py-5 flex flex-col gap-3.5 overflow-y-auto'>
           {children}
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 px-5 py-3.5 border-t border-[#e8e8e8]">
+        <div className='flex justify-end gap-2 px-5 py-3.5 border-t border-[#e8e8e8]'>
           {footer}
         </div>
-
       </div>
     </div>
   );
@@ -54,10 +72,12 @@ export default function BaseModal({ open, onClose, title, children, footer }) {
 // ─── Field wrapper ────────────────────────────────────────────────────────────
 export function Field({ label, optional, children }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[12px] font-semibold text-[#111]">
+    <div className='flex flex-col gap-1.5'>
+      <label className='text-[12px] font-semibold text-[#111]'>
         {label}{" "}
-        {optional && <span className="text-[#888] font-normal">(optionnel)</span>}
+        {optional && (
+          <span className='text-[#888] font-normal'>(optionnel)</span>
+        )}
       </label>
       {children}
     </div>

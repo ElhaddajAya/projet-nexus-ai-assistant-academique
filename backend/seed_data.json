@@ -1,0 +1,471 @@
+{
+  "filiere": {
+    "nom": "Ingénierie Informatique et Réseaux",
+    "code": "IIR",
+    "description": "Formation en développement logiciel, réseaux, systèmes et intelligence artificielle"
+  },
+  "modules": [
+    {
+      "matiere": "Algorithmique 1",
+      "annee": 1,
+      "semestre": 1,
+      "description": "Introduction aux algorithmes, structures de contrôle et bases de la programmation en C",
+      "difficulte": "moyen",
+      "ressources": [
+        {
+          "titre": "TD Algorithmique 1",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1W0iBJHo8Q7qIyJhVLLuRDGEsYEjs6LG1/view?usp=sharing",
+          "description": "Travaux dirigés sur les algorithmes fondamentaux"
+        },
+        {
+          "titre": "Chapitre 1 — Éléments de base (LP1)",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1nYUWG2YysXOWzBmUB1FTthKBsWSI4B0d/view?usp=sharing",
+          "description": "Introduction aux éléments de base de la programmation en C"
+        },
+        {
+          "titre": "Chapitre 2 — Structure Conditionnelle",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1qscOU_O8G3N4c7vBNckedhWcWD3W1iRD/view?usp=sharing",
+          "description": "Structures conditionnelles en langage C"
+        },
+        {
+          "titre": "Chapitre 3 — Structures Répétitives",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/193UvoiqNyirT14UXyPNLKiL7i_C9MwjK/view?usp=sharing",
+          "description": "Boucles et structures répétitives en C"
+        },
+        {
+          "titre": "Annexe — Les trois boucles en C",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/14N9cBC1R9PP-2o3n7LPPp1KkDMcLxCJE/view?usp=sharing",
+          "description": "Référence rapide sur les boucles for, while, do-while en C"
+        },
+        {
+          "titre": "TD Chapitre 2 (LP1)",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1ofhCZ5ydkV0AjgO7nnJYBPbFKQMBlUG9/view?usp=sharing",
+          "description": "Exercices pratiques sur les structures de base"
+        },
+        {
+          "titre": "TD Chapitre 3 (LP1)",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1qQdFrQOKzx6V1aEiB-PY_35WlwAdMKtv/view?usp=sharing",
+          "description": "Exercices pratiques sur les structures répétitives"
+        }
+      ]
+    },
+    {
+      "matiere": "Algèbre 1",
+      "annee": 1,
+      "semestre": 1,
+      "description": "Matrices, nombres complexes, fractions rationnelles, systèmes linéaires",
+      "difficulte": "difficile",
+      "ressources": [
+        {
+          "titre": "Cours — Matrices",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/12MMVqwjFDBXv9QH8rIIoN4VBcT_tHZ-a/view?usp=sharing",
+          "description": "Cours complet sur les matrices et opérations"
+        },
+        {
+          "titre": "Cours — Nombres Complexes",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/12iJfcsWb7zUrTNKYT4ajxdmoR73KebNx/view?usp=sharing",
+          "description": "Support de cours sur les nombres complexes"
+        },
+        {
+          "titre": "Cours — Fractions Rationnelles",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1aEsXp_Rj58drc59EpkbpxpqNfwOVd5sQ/view?usp=sharing",
+          "description": "Cours sur les fractions rationnelles"
+        },
+        {
+          "titre": "Cours — Systèmes Linéaires",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1fsieHMHJIzwsGL0Ut_ne9S6_TQMb-0-G/view?usp=sharing",
+          "description": "Résolution des systèmes d'équations linéaires"
+        },
+        {
+          "titre": "TD — Série 1 Complexes",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1PNfq2ooFMjQ758k2V7r-JILJFf0LlySf/view?usp=sharing",
+          "description": "Série d'exercices sur les nombres complexes"
+        },
+        {
+          "titre": "CH3 — TD1",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/18WXSMBPKrG_geMgDeE24mJvOEDmd7mSh/view?usp=sharing",
+          "description": "Travaux dirigés du chapitre 3"
+        },
+        {
+          "titre": "Examens Algèbre",
+          "type": "examen",
+          "lien": "https://drive.google.com/file/d/1HTnoZ4kOinmFFaWO0059fhhSPmNl6QgV/view?usp=sharing",
+          "description": "Annales d'examens d'Algèbre 1"
+        }
+      ]
+    },
+    {
+      "matiere": "Analyse 1",
+      "annee": 1,
+      "semestre": 1,
+      "description": "Suites numériques, développements limités, fonctions réelles",
+      "difficulte": "difficile",
+      "ressources": [
+        {
+          "titre": "Cours — Suites Numériques (Ch. 2)",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1sGJle5QJM2ZOQp1fPfEGehwPCsVkA-TG/view?usp=sharing",
+          "description": "Chapitre sur les suites numériques"
+        },
+        {
+          "titre": "Cours — Partie 2 (p.18-31)",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1uxnQAsUINlkCEhO3mWqwbW5-Hl4TLzHy/view?usp=sharing",
+          "description": "Suite du cours d'Analyse 1"
+        },
+        {
+          "titre": "Cours — Partie 3 (p.32-37)",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1wQfOfWIf-Vv0KK82N0NOyWp1rUSqVV7S/view?usp=sharing",
+          "description": "Fin du cours d'Analyse 1"
+        },
+        {
+          "titre": "Chapitre 5 — Développements Limités",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1hqg8FLoHIhG5uBzci1x7m2XDO2YTsESO/view?usp=sharing",
+          "description": "Cours sur les développements limités"
+        }
+      ]
+    },
+    {
+      "matiere": "Circuits Électriques",
+      "annee": 1,
+      "semestre": 1,
+      "description": "Lois des circuits électriques, régimes continu et alternatif",
+      "difficulte": "moyen",
+      "ressources": [
+        {
+          "titre": "Examen Électricité 2022",
+          "type": "examen",
+          "lien": "https://drive.google.com/file/d/1GwX5oAaCNcCmrw9-AinbeTkcWitYr6mr/view?usp=sharing",
+          "description": "Annale d'examen de circuits électriques"
+        }
+      ]
+    },
+    {
+      "matiere": "Circuits Numériques 1",
+      "annee": 1,
+      "semestre": 1,
+      "description": "Logique combinatoire, bascules, systèmes numériques",
+      "difficulte": "moyen",
+      "ressources": [
+        {
+          "titre": "Cours — Bascule RS",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1AS_QNpeb9fsYICwYxjo_JqPkbOCKG0JS/view?usp=sharing",
+          "description": "Cours sur les bascules RS en logique numérique"
+        },
+        {
+          "titre": "Cours — Chronogramme Bascule RS",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1OdiYjV9r2beud-XaqlQCQAPfA3B-b5nB/view?usp=sharing",
+          "description": "Représentation chronogramme des bascules RS"
+        },
+        {
+          "titre": "TD3 — Logique Combinatoire",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1Tx9Twpd6Y2EdCCo_lH7KOMbrF8wV47Zs/view?usp=sharing",
+          "description": "Exercices de logique combinatoire"
+        },
+        {
+          "titre": "TD4 — Correction",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1VDh4z_8jmmigKnKxTG1azBYBR3az6EKg/view?usp=sharing",
+          "description": "Correction du TD4 de circuits numériques"
+        },
+        {
+          "titre": "TD 1 CN S1 2024",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1Vs8bz1YKeC-6zuDbFQrp4OD_PNqMdYo4/view?usp=sharing",
+          "description": "TD de circuits numériques S1 2024"
+        }
+      ]
+    },
+    {
+      "matiere": "Organisation des Entreprises",
+      "annee": 1,
+      "semestre": 1,
+      "description": "Théories organisationnelles, structures d'entreprises, management",
+      "difficulte": "facile",
+      "ressources": [
+        {
+          "titre": "Les Théories Organisationnelles",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1M4uOtfAbf67TndIcVaHvIY-M_B-ldbPJ/view?usp=sharing",
+          "description": "Cours sur les théories des organisations"
+        },
+        {
+          "titre": "Théorie des Organisations 2024",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1yN7PuXAwa_ml-LqvHlnioEctY8-pqx0r/view?usp=sharing",
+          "description": "Support de cours mis à jour 2024"
+        },
+        {
+          "titre": "Les Styles d'Apprentissage",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1MnqqvPe-1MbXugBOQHhvGrOiEOQyqHad/view?usp=sharing",
+          "description": "Cours sur les styles d'apprentissage"
+        },
+        {
+          "titre": "Exercices — Écoles & Structures",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1KY2IhQJzU1AC_NsTeDXyAmHlDF5VTHft/view?usp=sharing",
+          "description": "Exercices sur les structures organisationnelles"
+        }
+      ]
+    },
+    {
+      "matiere": "Électromagnétisme",
+      "annee": 1,
+      "semestre": 2,
+      "description": "Champs électriques et magnétiques, lois fondamentales",
+      "difficulte": "difficile",
+      "ressources": [
+        {
+          "titre": "Cours Électromagnétisme — Parties 1 & 2",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1xSI5Qf3mg6_S9D7ZTZ8mAY969IQMz23t/view?usp=sharing",
+          "description": "Cours complet d'électromagnétisme"
+        }
+      ]
+    },
+    {
+      "matiere": "Introduction à l'Intelligence Artificielle",
+      "annee": 1,
+      "semestre": 2,
+      "description": "Concepts fondamentaux de l'IA, historique et applications",
+      "difficulte": "facile",
+      "ressources": [
+        {
+          "titre": "Cours — Introduction à l'IA",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1GfX6s7xGPYhChrX3RysOwgZiroeBZosw/view?usp=sharing",
+          "description": "Notes de cours d'introduction à l'intelligence artificielle (1A 2024-2025)"
+        }
+      ]
+    },
+    {
+      "matiere": "Structure de Machine",
+      "annee": 1,
+      "semestre": 2,
+      "description": "Architecture des ordinateurs, composants matériels, organisation interne",
+      "difficulte": "moyen",
+      "ressources": [
+        {
+          "titre": "Cours — Structure de Machine 1",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1xe3UNhv_AZ8eAttHXOmTbFKlA-Q9cfo1/view?usp=sharing",
+          "description": "Cours sur la structure interne d'un ordinateur"
+        }
+      ]
+    },
+    {
+      "matiere": "Métrologie",
+      "annee": 1,
+      "semestre": 2,
+      "description": "Mesures, instruments, incertitudes et TP de métrologie",
+      "difficulte": "moyen",
+      "ressources": [
+        {
+          "titre": "TP Métrologie II",
+          "type": "TP",
+          "lien": "https://drive.google.com/file/d/1YNV3y9dFNquLdKy4MUevnEgG3uapRegG/view?usp=sharing",
+          "description": "Travaux pratiques de métrologie"
+        }
+      ]
+    },
+    {
+      "matiere": "Français — Communication",
+      "annee": 1,
+      "semestre": 2,
+      "description": "Expression écrite et orale en français, conditionnel de politesse",
+      "difficulte": "facile",
+      "ressources": [
+        {
+          "titre": "Cours B2 — Le Conditionnel",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1F-28TTkmhe4xCFgEvlaNNunR12lcFlFm/view?usp=sharing",
+          "description": "Cours sur le conditionnel de politesse"
+        }
+      ]
+    },
+    {
+      "matiere": "Programmation Avancée en C",
+      "annee": 2,
+      "semestre": 1,
+      "description": "Tableaux, fonctions, pointeurs, fichiers et structures de données en C",
+      "difficulte": "difficile",
+      "ressources": [
+        {
+          "titre": "Cours — Tableaux",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/12AbhSKyMBRIUn2vlgJwqb2PLiVqv68PL/view?usp=sharing",
+          "description": "Cours sur les tableaux en C"
+        },
+        {
+          "titre": "Cours — Fonctions",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/170AC86d6j-khqTQt7W_5qgkvQfMEe6_c/view?usp=sharing",
+          "description": "Cours sur les fonctions en C"
+        },
+        {
+          "titre": "Cours — Pointeurs",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/17SfBS5dXJPTVIGf2RKqc2zaJSrdHSMr3/view?usp=sharing",
+          "description": "Cours sur les pointeurs en C"
+        },
+        {
+          "titre": "Cours — Fichiers",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1Ay8yPiNImEi4_hs20QEjzJ3q0exL5_Xd/view?usp=sharing",
+          "description": "Gestion des fichiers en C"
+        },
+        {
+          "titre": "Cours Langage C — S2",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1sz8w_hJutGJWwI-RyUM9raOdUyK9AAGt/view?usp=sharing",
+          "description": "Cours complet du langage C semestre 2"
+        },
+        {
+          "titre": "TD Langage C — S2",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1bTQAzjwuoeuPaPTQf_UU-clHY2Xlgpv1/view?usp=sharing",
+          "description": "Travaux dirigés du langage C"
+        },
+        {
+          "titre": "Correction TDs",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1M3ROcHaElw0b0PztrA8UWgBSm0q_M6ZW/view?usp=sharing",
+          "description": "Correction des travaux dirigés de programmation C"
+        }
+      ]
+    },
+    {
+      "matiere": "Probabilités",
+      "annee": 2,
+      "semestre": 1,
+      "description": "Analyse combinatoire, variables aléatoires, lois de probabilité",
+      "difficulte": "difficile",
+      "ressources": [
+        {
+          "titre": "Chapitre 1 — Analyse Combinatoire",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1JQ6JjjEIC1Y4uA8_9pzTf6r0yzStDniS/view?usp=sharing",
+          "description": "Cours sur l'analyse combinatoire"
+        },
+        {
+          "titre": "Proba — Chapitre 3 (partie 1)",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1aIc_euBeYeEmsssLoy5-A5zBjdjTDvjk/view?usp=sharing",
+          "description": "Variables aléatoires — première partie"
+        },
+        {
+          "titre": "Proba — Chapitre 3 (partie 2)",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1WRLfJF9Me87GAHYdrmhf9VzwKmE2umgz/view?usp=sharing",
+          "description": "Variables aléatoires — deuxième partie"
+        },
+        {
+          "titre": "Variables Aléatoires — Pré-Chapitre 3",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1Sz95qxE90ORDGQ2WxABQ9S60P_o4Y-2y/view?usp=sharing",
+          "description": "Introduction aux variables aléatoires"
+        },
+        {
+          "titre": "Chapitre 3 — Variables Aléatoires (cours complet)",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1eaRnjBlWY7MtsBde07NdKHkm3U_zcNeq/view?usp=sharing",
+          "description": "Cours complet sur les variables aléatoires"
+        },
+        {
+          "titre": "Exercice FIFO",
+          "type": "TD",
+          "lien": "https://drive.google.com/file/d/1u9JJI9eT5CMguSZzxoOKrfT8vahrt-iQ/view?usp=sharing",
+          "description": "Exercice sur les files d'attente (FIFO)"
+        }
+      ]
+    },
+    {
+      "matiere": "Microprocesseurs",
+      "annee": 2,
+      "semestre": 1,
+      "description": "Architecture du microprocesseur 8086, programmation assembleur",
+      "difficulte": "difficile",
+      "ressources": [
+        {
+          "titre": "Cours Microprocesseurs 2025-2026",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1sPjiQWYfO2S2MNif2nRossawfqomOlJT/view?usp=sharing",
+          "description": "Cours complet sur le microprocesseur 8086"
+        }
+      ]
+    },
+    {
+      "matiere": "Systèmes d'Exploitation",
+      "annee": 2,
+      "semestre": 2,
+      "description": "Architecture des SE, gestion des processus, mémoire et systèmes de fichiers",
+      "difficulte": "difficile",
+      "ressources": [
+        {
+          "titre": "Architecture Ordinateurs & SE1",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1DIO9nxhGSTPX4M8RFIELDFyE-Vy2dQZq/view?usp=sharing",
+          "description": "Cours sur l'architecture des ordinateurs et SE"
+        },
+        {
+          "titre": "Cours Systèmes d'Exploitation",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1R5MIgmcvnRZvBIA18FStCgIO2TTPsUuk/view?usp=sharing",
+          "description": "Cours général sur les systèmes d'exploitation"
+        },
+        {
+          "titre": "SE — Chapitres 0, 1, 2 (2025)",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1atBMSFvB-GAhSkpxTNvS7L_n2YHkVTME/view?usp=sharing",
+          "description": "Cours de SE mis à jour novembre 2025"
+        }
+      ]
+    },
+    {
+      "matiere": "Merise",
+      "annee": 2,
+      "semestre": 2,
+      "description": "Méthode d'analyse et de conception des systèmes d'information (MCC, MCT)",
+      "difficulte": "moyen",
+      "ressources": [
+        {
+          "titre": "Merise — Introduction",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/1-P0E74qV6flOK-GMIu6DAXm2Ad4B_fVl/view?usp=sharing",
+          "description": "Introduction à la méthode Merise"
+        },
+        {
+          "titre": "Merise — MCC (Modèle Conceptuel de Communication)",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/10wamOYPvkx9rIJy9yfVGhjplXx0p5BEZ/view?usp=sharing",
+          "description": "Cours sur le Modèle Conceptuel de Communication"
+        },
+        {
+          "titre": "Merise — MCT (Modèle Conceptuel de Traitement)",
+          "type": "cours",
+          "lien": "https://drive.google.com/file/d/145FpZU3Gi36-26yb4nRGTTeBqGI4bHQc/view?usp=sharing",
+          "description": "Cours sur le Modèle Conceptuel de Traitement"
+        }
+      ]
+    }
+  ]
+}

@@ -71,7 +71,14 @@ export default function RessourceModal({ open, onClose, onSave, initial }) {
   }, [initial, open]);
 
   function handleSubmit() {
-    if (!titre.trim() || !type || !filiereId || !matiereId) return;
+    if (
+      !titre.trim() ||
+      !description.trim() ||
+      !type ||
+      !filiereId ||
+      !matiereId
+    )
+      return;
     onSave({
       ...initial,
       titre: titre.trim(),
@@ -117,16 +124,17 @@ export default function RessourceModal({ open, onClose, onSave, initial }) {
       </Field>
 
       {/* Description */}
-      <Field
-        label='Description'
-        optional
-      >
+      <Field label='Description'>
         <textarea
-          className={`${inputClass} h-15 resize-none`}
+          className={`${inputClass} h-[100px] resize-none`}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder='Ex : Un cours abordant la modélisation UML et les diagrammes de classes.'
+          placeholder='Décrivez précisément le contenu : notions couvertes, chapitres, concepts clés. Ex : Cours couvrant Retrofit, les appels asynchrones avec enqueue(), la gestion des erreurs réseau et les timeouts sous Android.'
         />
+        <span className='text-[11px] text-[#888]'>
+          Une description précise améliore la qualité des recommandations de
+          l'IA
+        </span>
       </Field>
 
       {/* Type */}

@@ -274,19 +274,47 @@ export function MatieresPage() {
 // ─── RessourcesPage ───────────────────────────────────────────────────────────
 import RessourceModal from "../../components/admin/modals/RessourceModal";
 
+// Styles des badges par type
+const TYPE_STYLES = {
+  video:      { label: "Vidéo",    class: "bg-red-100 text-red-700"    },
+  document:   { label: "Document", class: "bg-blue-100 text-blue-700"  },
+  "TP/TD":    { label: "TP / TD",  class: "bg-amber-100 text-amber-700"},
+  "site web": { label: "Site web", class: "bg-green-100 text-green-700"},
+};
+
+// Styles des badges par niveau
+const NIVEAU_STYLES = {
+  "1ère année": "bg-purple-100 text-purple-700",
+  "2ème année": "bg-indigo-100 text-indigo-700",
+  "3ème année": "bg-cyan-100 text-cyan-700",
+  "4ème année": "bg-teal-100 text-teal-700",
+  "5ème année": "bg-orange-100 text-orange-700",
+};
+
+// Petit composant de filtre pill
+function FilterPill({ label, active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-1 rounded-full text-[11px] font-medium border transition-all
+        ${active
+          ? "bg-[#111] text-white border-[#111]"
+          : "border-[#e8e8e8] text-[#888] hover:border-[#bbb] hover:text-[#111]"
+        }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 export function RessourcesPage() {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState("Tous");
+  const [filterNiveau, setFilterNiveau] = useState("Tous");
   const [modalOpen, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const TYPE_STYLES = {
-    video:      { label: "Vidéo",    class: "bg-red-100 text-red-700"    },
-    document:   { label: "Document", class: "bg-blue-100 text-blue-700"  },
-    "TP/TD":    { label: "TP / TD",  class: "bg-amber-100 text-amber-700"},
-    "site web": { label: "Site web", class: "bg-green-100 text-green-700"},
-  };
 
   useEffect(() => {
     api.get("/ressources")
@@ -295,13 +323,17 @@ export function RessourcesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = data.filter((r) =>
-    r.titre.toLowerCase().includes(search.toLowerCase()),
-  );
+  // Filtrage : recherche + type + niveau
+  const filtered = data.filter((r) => {
+    const matchSearch  = r.titre.toLowerCase().includes(search.toLowerCase());
+    const matchType    = filterType === "Tous" || r.type === filterType;
+    const matchNiveau  = filterNiveau === "Tous" || r.niveau === filterNiveau;
+    return matchSearch && matchType && matchNiveau;
+  });
 
-  // Pagination
+  // Pagination — reset à page 1 quand un filtre change
   const { page, setPage, paginated, totalPages } = usePagination(filtered, 8);
-  useEffect(() => { setPage(1); }, [search]);
+  useEffect(() => { setPage(1); }, [search, filterType, filterNiveau]);
 
   async function handleSave(item) {
     try {
@@ -342,6 +374,8 @@ export function RessourcesPage() {
       <AdminTopbar title="Ressources" subtitle={`${data.length} ressources disponibles`} />
       <div className="p-7">
         <div className="border border-[#e8e8e8] rounded-xl overflow-hidden">
+
+          {/* ── Header : titre + search + bouton ── */}
           <div className="px-[18px] py-3.5 border-b border-[#e8e8e8] flex items-center justify-between">
             <div>
               <h3 className="text-[13px] font-semibold">Toutes les ressources</h3>
@@ -359,29 +393,70 @@ export function RessourcesPage() {
               </button>
             </div>
           </div>
+
+          {/* ── Filtres Type + Niveau ── */}
+          <div className="px-[18px] py-2.5 border-b border-[#e8e8e8] flex items-center gap-4 flex-wrap">
+            {/* Filtre Type */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] font-semibold text-[#888] mr-1">Type :</span>
+              {["Tous", "document", "TP/TD", "video", "site web"].map((t) => (
+                <FilterPill
+                  key={t}
+                  label={t === "document" ? "Document" : t === "TP/TD" ? "TP/TD" : t === "video" ? "Vidéo" : t === "site web" ? "Site web" : t}
+                  active={filterType === t}
+                  onClick={() => setFilterType(t)}
+                />
+              ))}
+            </div>
+
+            {/* Séparateur */}
+            <div className="w-px h-4 bg-[#e8e8e8]" />
+
+            {/* Filtre Niveau */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] font-semibold text-[#888] mr-1">Niveau :</span>
+              {["Tous", "1ère année", "2ème année", "3ème année", "4ème année", "5ème année"].map((n) => (
+                <FilterPill
+                  key={n}
+                  label={n}
+                  active={filterNiveau === n}
+                  onClick={() => setFilterNiveau(n)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* ── Table ── */}
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-[#e8e8e8]">
-                {["Titre", "Type", "Lien", ""].map((h) => (
+                {["Titre", "Type", "Niveau", "Lien", ""].map((h) => (
                   <th key={h} className="px-[18px] py-2.5 text-[11px] font-semibold text-[#888] text-left tracking-[0.3px]">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={4} className="text-center py-10">
+                <tr><td colSpan={5} className="text-center py-10">
                   <div className="w-6 h-6 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin mx-auto" />
                 </td></tr>
               ) : paginated.length === 0 ? (
-                <tr><td colSpan={4} className="text-center py-10 text-[13px] text-[#888]">Aucune ressource trouvée</td></tr>
+                <tr><td colSpan={5} className="text-center py-10 text-[13px] text-[#888]">Aucune ressource trouvée</td></tr>
               ) : (
                 paginated.map((r) => {
                   const t = TYPE_STYLES[r.type] || TYPE_STYLES["document"];
+                  const niveauClass = NIVEAU_STYLES[r.niveau] || "bg-[#f0f0f0] text-[#888]";
                   return (
                     <tr key={r._id} className="border-b border-[#e8e8e8] last:border-b-0 hover:bg-[#f9f9f9] transition-colors group">
                       <td className="px-[18px] py-3 text-[13px] font-medium">{r.titre}</td>
                       <td className="px-[18px] py-3">
                         <span className={`text-[9px] font-bold px-2 py-1 rounded ${t.class}`}>{t.label}</span>
+                      </td>
+                      <td className="px-[18px] py-3">
+                        {r.niveau
+                          ? <span className={`text-[9px] font-bold px-2 py-1 rounded ${niveauClass}`}>{r.niveau}</span>
+                          : <span className="text-[12px] text-[#ccc]">—</span>
+                        }
                       </td>
                       <td className="px-[18px] py-3 text-[12px] font-mono text-[#888] max-w-[160px] truncate">{r.lien}</td>
                       <td className="px-[18px] py-3">

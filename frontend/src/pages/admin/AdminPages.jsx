@@ -312,28 +312,45 @@ export function RessourcesPage() {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("Tous");
   const [filterNiveau, setFilterNiveau] = useState("Tous");
+  const [filterMatiere, setFilterMatiere] = useState("Toutes");
+  const [matieres, setMatieres] = useState([]);
   const [modalOpen, setModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/ressources")
-      .then((res) => setData(res.data))
+    Promise.all([
+      api.get("/ressources"),
+      api.get("/matieres"),
+    ])
+      .then(([resR, resM]) => {
+        setData(resR.data);
+        setMatieres(resM.data);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   // Filtrage : recherche + type + niveau
+  const matieresAvecRessources = matieres.filter((m) =>
+    data.some((r) => {
+      const id = typeof r.matiereId === "object" ? r.matiereId?._id : r.matiereId;
+      return id === m._id;
+    })
+  );
+
   const filtered = data.filter((r) => {
     const matchSearch  = r.titre.toLowerCase().includes(search.toLowerCase());
     const matchType    = filterType === "Tous" || r.type === filterType;
     const matchNiveau  = filterNiveau === "Tous" || r.niveau === filterNiveau;
-    return matchSearch && matchType && matchNiveau;
+    const rId          = typeof r.matiereId === "object" ? r.matiereId?._id : r.matiereId;
+    const matchMatiere = filterMatiere === "Toutes" || rId === filterMatiere;
+    return matchSearch && matchType && matchNiveau && matchMatiere;
   });
 
   // Pagination — reset à page 1 quand un filtre change
   const { page, setPage, paginated, totalPages } = usePagination(filtered, 8);
-  useEffect(() => { setPage(1); }, [search, filterType, filterNiveau]);
+  useEffect(() => { setPage(1); }, [search, filterType, filterNiveau, filterMatiere]);
 
   async function handleSave(item) {
     try {
@@ -423,6 +440,37 @@ export function RessourcesPage() {
                   onClick={() => setFilterNiveau(n)}
                 />
               ))}
+            </div>
+
+            {/* Séparateur */}
+            <div className="w-px h-4 bg-[#e8e8e8]" />
+
+            {/* Filtre Matière */}
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-semibold text-[#888]">Matière :</span>
+              <select
+                value={filterMatiere}
+                onChange={(e) => setFilterMatiere(e.target.value)}
+                className="text-[11px] text-[#111] border border-[#e8e8e8] rounded-[8px] px-2.5 py-1.5 outline-none bg-white focus:border-[#111] transition-colors cursor-pointer appearance-none pr-6"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 8px center",
+                }}
+              >
+                <option value="Toutes">Toutes les matières</option>
+                {matieresAvecRessources.map((m) => (
+                  <option key={m._id} value={m._id}>{m.nom_matiere}</option>
+                ))}
+              </select>
+              {filterMatiere !== "Toutes" && (
+                <button
+                  onClick={() => setFilterMatiere("Toutes")}
+                  className="text-[10px] text-[#888] hover:text-[#111] border border-[#e8e8e8] hover:border-[#bbb] rounded-md px-1.5 py-1 transition-colors"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           </div>
 

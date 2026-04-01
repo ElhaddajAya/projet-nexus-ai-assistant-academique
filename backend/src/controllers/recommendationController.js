@@ -35,9 +35,44 @@ const generate = async (req, res) =>
       });
     }
 
-    // 2. Récupérer UNIQUEMENT les ressources de la matière choisie
-    //    CORRECTION : avant on récupérait toutes les ressources de la filière,
-    //    ce qui envoyait des ressources hors-sujet à Groq (ex: React pour Laravel)
+    // ── CACHE : vérifier si une recommandation identique existe déjà ──────────
+    // Principe : si l'étudiant a déjà soumis le même profil (même matière +
+    // mêmes difficultés), on retourne la recommandation existante directement
+    // sans appeler Groq —> réduit le coût API et la charge serveur
+    const difficultesSorted = [...submission.difficultes].sort();
+
+    // Chercher toutes les recommendations de cet utilisateur pour cette matière
+    const existingRecos = await Recommendation.find({ userId }).populate({
+      path: "submissionId",
+      select: "matiereId difficultes",
+    });
+
+    // Comparer les difficultés une par une
+    const cached = existingRecos.find((reco) =>
+    {
+      if (!reco.submissionId) return false;
+
+      // Même matière ?
+      const sameMat =
+        reco.submissionId.matiereId?.toString() ===
+        submission.matiereId._id.toString();
+
+      if (!sameMat) return false;
+
+      // Mêmes difficultés (triées pour comparer dans n'importe quel ordre) ?
+      const existingDiffs = [...(reco.submissionId.difficultes || [])].sort();
+      return JSON.stringify(existingDiffs) === JSON.stringify(difficultesSorted);
+    });
+
+    if (cached)
+    {
+      // Cache hit — recommandation réutilisée sans appel Groq
+      console.log("Cache hit — recommandation réutilisée sans appel Groq");
+      return res.status(200).json(cached);
+    }
+    // ── FIN CACHE ──────────────────────────────────────────────────────────────
+
+    // 2. Récupérer les ressources de la matière choisie
     const ressources = await Ressource.find({
       matiereId: submission.matiereId._id,
     });
@@ -54,7 +89,7 @@ const generate = async (req, res) =>
       ressources,
     });
 
-    // 4. Sauvegarder la recommandation avec note_progression et chat_history vide
+    // 4. Sauvegarder la recommandation
     const recommendation = await Recommendation.create({
       submissionId,
       userId,

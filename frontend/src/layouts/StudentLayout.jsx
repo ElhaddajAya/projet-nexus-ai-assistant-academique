@@ -1,6 +1,27 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+// ─── Composant logo boussole OrientAI ────────────────────────────────────────
+// Remplace l'ancien badge vert "EMSI" par le symbole SVG de la boussole
+function CompassLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="72" fill="none" stroke="#22c55e" strokeWidth="2.5"/>
+      <circle cx="100" cy="100" r="56" fill="#22c55e" opacity="0.08"/>
+      <polygon points="100,40 88,100 100,88 112,100" fill="#22c55e"/>
+      <polygon points="100,160 88,100 100,112 112,100" fill="#22c55e" opacity="0.3"/>
+      <circle cx="100" cy="100" r="6" fill="#22c55e"/>
+      <line x1="100" y1="28" x2="100" y2="38" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="100" y1="162" x2="100" y2="172" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="172" y1="100" x2="162" y2="100" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="28" y1="100" x2="38" y2="100" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="136" cy="61" r="4.5" fill="#22c55e"/>
+      <circle cx="148" cy="73" r="2.5" fill="#22c55e" opacity="0.55"/>
+      <circle cx="142" cy="51" r="2.5" fill="#22c55e" opacity="0.35"/>
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
   {
     label: "Navigation",
@@ -10,41 +31,11 @@ const NAV_ITEMS = [
         label: "Dashboard",
         path: "/student",
         icon: (
-          <svg
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-            className='w-[15px] h-[15px]'
-          >
-            <rect
-              x='3'
-              y='3'
-              width='7'
-              height='7'
-              rx='1'
-            />
-            <rect
-              x='14'
-              y='3'
-              width='7'
-              height='7'
-              rx='1'
-            />
-            <rect
-              x='3'
-              y='14'
-              width='7'
-              height='7'
-              rx='1'
-            />
-            <rect
-              x='14'
-              y='14'
-              width='7'
-              height='7'
-              rx='1'
-            />
+          <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='w-[15px] h-[15px]'>
+            <rect x='3' y='3' width='7' height='7' rx='1'/>
+            <rect x='14' y='3' width='7' height='7' rx='1'/>
+            <rect x='3' y='14' width='7' height='7' rx='1'/>
+            <rect x='14' y='14' width='7' height='7' rx='1'/>
           </svg>
         ),
       },
@@ -53,14 +44,8 @@ const NAV_ITEMS = [
         label: "Mes résultats",
         path: "/student/resultats",
         icon: (
-          <svg
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-            className='w-[15px] h-[15px]'
-          >
-            <polyline points='22 12 18 12 15 21 9 3 6 12 2 12' />
+          <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='w-[15px] h-[15px]'>
+            <polyline points='22 12 18 12 15 21 9 3 6 12 2 12'/>
           </svg>
         ),
       },
@@ -69,15 +54,9 @@ const NAV_ITEMS = [
         label: "Ressources",
         path: "/student/ressources",
         icon: (
-          <svg
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-            className='w-[15px] h-[15px]'
-          >
-            <path d='M4 19.5A2.5 2.5 0 016.5 17H20' />
-            <path d='M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z' />
+          <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='w-[15px] h-[15px]'>
+            <path d='M4 19.5A2.5 2.5 0 016.5 17H20'/>
+            <path d='M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z'/>
           </svg>
         ),
       },
@@ -91,19 +70,9 @@ const NAV_ITEMS = [
         label: "Profil",
         path: "/student/profil",
         icon: (
-          <svg
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-            className='w-[15px] h-[15px]'
-          >
-            <circle
-              cx='12'
-              cy='8'
-              r='4'
-            />
-            <path d='M20 21a8 8 0 10-16 0' />
+          <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='w-[15px] h-[15px]'>
+            <circle cx='12' cy='8' r='4'/>
+            <path d='M20 21a8 8 0 10-16 0'/>
           </svg>
         ),
       },
@@ -115,15 +84,11 @@ export default function StudentLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Initiales du prénom + nom
   const initiales = user
     ? `${user.prenom?.[0] ?? ""}${user.nom?.[0] ?? ""}`.toUpperCase()
     : "??";
 
-  // Nom affiché
   const displayName = user ? `${user.prenom} ${user.nom}` : "Étudiant";
-
-  // Infos filière/semestre si disponibles
   const displaySub = user?.semestre ? `Semestre ${user.semestre}` : "Étudiant";
 
   function handleLogout() {
@@ -134,18 +99,12 @@ export default function StudentLayout() {
   return (
     <div className='flex min-h-screen bg-white text-[#111] font-sans text-sm'>
       <aside className='w-[220px] min-h-screen border-r border-[#e8e8e8] flex flex-col py-5 fixed inset-y-0 left-0 bg-white z-10'>
-        {/* Logo */}
+        {/* Logo — boussole SVG + nom OrientAI */}
         <div className='flex items-center gap-2.5 px-4 pb-5 border-b border-[#e8e8e8]'>
-          <div className='w-8 h-8 bg-[#22c55e] rounded-lg flex items-center justify-center text-[10px] font-bold text-white'>
-            EMSI
-          </div>
+          <CompassLogo />
           <div>
-            <strong className='block text-[13px] font-semibold'>
-              OrientAI
-            </strong>
-            <small className='text-[11px] text-[#888]'>
-              Assistant académique
-            </small>
+            <strong className='block text-[13px] font-semibold'>OrientAI</strong>
+            <small className='text-[11px] text-[#888]'>Assistant académique</small>
           </div>
         </div>
 
@@ -187,9 +146,7 @@ export default function StudentLayout() {
               {initiales}
             </div>
             <div className='flex-1 min-w-0'>
-              <strong className='block text-[12px] font-semibold truncate'>
-                {displayName}
-              </strong>
+              <strong className='block text-[12px] font-semibold truncate'>{displayName}</strong>
               <small className='text-[11px] text-[#888]'>{displaySub}</small>
             </div>
           </div>
@@ -197,22 +154,10 @@ export default function StudentLayout() {
             onClick={handleLogout}
             className='mt-1 w-full flex items-center gap-2 px-2 py-1.5 rounded-[10px] text-[12px] text-[#888] hover:bg-[#f9f9f9] hover:text-red-500 transition-colors'
           >
-            <svg
-              width='13'
-              height='13'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-            >
-              <path d='M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4' />
-              <polyline points='16 17 21 12 16 7' />
-              <line
-                x1='21'
-                y1='12'
-                x2='9'
-                y2='12'
-              />
+            <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+              <path d='M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4'/>
+              <polyline points='16 17 21 12 16 7'/>
+              <line x1='21' y1='12' x2='9' y2='12'/>
             </svg>
             Déconnexion
           </button>

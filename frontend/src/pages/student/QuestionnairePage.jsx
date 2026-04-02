@@ -26,9 +26,7 @@ const NIVEAUX = [
 // ─── Semestres fixes ──────────────────────────────────────────────────────────
 const SEMESTRES = ["S1", "S2"];
 
-// ─── Card wrapper — défini HORS du composant pour éviter le bug de focus ─────
-// Si Card était défini à l'intérieur, React le recrée à chaque re-render
-// ce qui cause la perte de focus sur les inputs/textareas
+// ─── Card wrapper ─────────────────────────────────────────────────────────────
 function Card({ children, progress, submitted }) {
   return (
     <div className='w-full max-w-[500px] border border-[#e8e8e8] rounded-[14px] overflow-hidden bg-white'>
@@ -43,7 +41,7 @@ function Card({ children, progress, submitted }) {
   );
 }
 
-// ─── Header d'étape — défini HORS du composant pour la même raison ────────────
+// ─── Header d'étape ───────────────────────────────────────────────────────────
 function StepHeader({ step, total, title, desc }) {
   return (
     <div className='mb-5'>
@@ -51,10 +49,7 @@ function StepHeader({ step, total, title, desc }) {
         <span className='text-[11px] font-semibold text-[#888]'>
           Étape {step} sur {total}
         </span>
-        <StepDots
-          current={step}
-          total={total}
-        />
+        <StepDots current={step} total={total} />
       </div>
       <h2 className='text-[16px] font-semibold mb-1'>{title}</h2>
       <p className='text-[12px] text-[#888] leading-relaxed'>{desc}</p>
@@ -78,14 +73,7 @@ function StepDots({ current, total }) {
 }
 
 // ─── Select field ─────────────────────────────────────────────────────────────
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-  placeholder,
-  disabled,
-}) {
+function SelectField({ label, value, onChange, options, placeholder, disabled }) {
   return (
     <div className='flex flex-col gap-1.5'>
       <label className='text-[12px] font-semibold text-[#111]'>{label}</label>
@@ -102,17 +90,9 @@ function SelectField({
           paddingRight: "32px",
         }}
       >
-        <option
-          value=''
-          disabled
-        >
-          {placeholder}
-        </option>
+        <option value='' disabled>{placeholder}</option>
         {options.map((o) => (
-          <option
-            key={typeof o === "string" ? o : o._id}
-            value={typeof o === "string" ? o : o._id}
-          >
+          <option key={typeof o === "string" ? o : o._id} value={typeof o === "string" ? o : o._id}>
             {typeof o === "string" ? o : o._label}
           </option>
         ))}
@@ -136,9 +116,7 @@ function ChoiceCard({ label, sub, selected, onClick }) {
         {selected && <div className='w-1.5 h-1.5 rounded-full bg-white' />}
       </div>
       <div>
-        <strong className='block text-[13px] font-medium text-[#111]'>
-          {label}
-        </strong>
+        <strong className='block text-[13px] font-medium text-[#111]'>{label}</strong>
         {sub && <span className='text-[11px] text-[#888]'>{sub}</span>}
       </div>
     </div>
@@ -158,14 +136,7 @@ function CheckCard({ label, checked, onClick }) {
         ${checked ? "border-[#111] bg-[#111]" : "border-[#e8e8e8]"}`}
       >
         {checked && (
-          <svg
-            width='10'
-            height='10'
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='white'
-            strokeWidth='3'
-          >
+          <svg width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' strokeWidth='3'>
             <polyline points='20 6 9 17 4 12' />
           </svg>
         )}
@@ -176,12 +147,7 @@ function CheckCard({ label, checked, onClick }) {
 }
 
 // ─── Nav buttons ──────────────────────────────────────────────────────────────
-function NavButtons({
-  onPrev,
-  onNext,
-  nextLabel = "Suivant",
-  nextGreen = false,
-}) {
+function NavButtons({ onPrev, onNext, nextLabel = "Suivant", nextGreen = false }) {
   return (
     <div className='flex justify-between items-center pt-2 border-t border-[#e8e8e8] mt-4'>
       {onPrev ? (
@@ -189,14 +155,7 @@ function NavButtons({
           onClick={onPrev}
           className='flex items-center gap-1.5 px-4 py-2 border border-[#e8e8e8] rounded-lg text-[13px] font-medium text-[#888] hover:border-[#bbb] hover:text-[#111] transition-colors'
         >
-          <svg
-            width='14'
-            height='14'
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-          >
+          <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
             <polyline points='15 18 9 12 15 6' />
           </svg>
           Précédent
@@ -210,14 +169,7 @@ function NavButtons({
         ${nextGreen ? "bg-[#22c55e] text-white hover:bg-[#16a34a]" : "bg-[#111] text-white hover:bg-[#333]"}`}
       >
         {nextLabel}
-        <svg
-          width='14'
-          height='14'
-          viewBox='0 0 24 24'
-          fill='none'
-          stroke='currentColor'
-          strokeWidth='2'
-        >
+        <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
           {nextGreen ? (
             <polyline points='20 6 9 17 4 12' />
           ) : (
@@ -232,8 +184,6 @@ function NavButtons({
 // ─── Page principale ──────────────────────────────────────────────────────────
 export default function QuestionnairePage() {
   const navigate = useNavigate();
-
-  // updateUser permet de mettre à jour le profil dans le Context + localStorage
   const { updateUser, user } = useAuth();
 
   const [step, setStep] = useState(1);
@@ -241,12 +191,12 @@ export default function QuestionnairePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ── Données chargées depuis l'API ──
+  // Données chargées depuis l'API
   const [filieres, setFilieres] = useState([]);
   const [modules, setModules] = useState([]);
   const [matieres, setMatieres] = useState([]);
 
-  // ── Valeurs du formulaire ──
+  // Valeurs du formulaire
   const [filiereId, setFiliereId] = useState(user?.filiereId || "");
   const [niveau, setNiveau] = useState(user?.niveau || "");
   const [semestre, setSemestre] = useState("");
@@ -257,10 +207,13 @@ export default function QuestionnairePage() {
   const [objectifs, setObjectifs] = useState([]);
   const [objLibre, setObjLibre] = useState("");
 
-  // ── submissionId stocké après POST pour la redirection finale ──
+  // FIX BUG 1 — Recherche dans la liste des modules (étape 2)
+  // Permet à l'étudiant de trouver rapidement son module quand la liste est longue
+  const [moduleSearch, setModuleSearch] = useState("");
+
   const [submissionId, setSubmissionId] = useState(null);
 
-  // ── 1. Charger les filières au montage ──
+  // Charger les filières au montage
   useEffect(() => {
     api
       .get("/filieres")
@@ -275,7 +228,7 @@ export default function QuestionnairePage() {
       .catch(() => setError("Impossible de charger les filières"));
   }, []);
 
-  // ── 2. Charger les modules quand filière + semestre changent ──
+  // Charger les modules quand filière + semestre changent
   useEffect(() => {
     if (filiereId && semestre) {
       api
@@ -289,9 +242,10 @@ export default function QuestionnairePage() {
     setModuleId("");
     setMatiereId("");
     setDiffs([]);
+    setModuleSearch(""); // reset la recherche aussi
   }, [filiereId, semestre]);
 
-  // ── 3. Charger les matières quand le module change ──
+  // Charger les matières quand le module change
   useEffect(() => {
     if (moduleId) {
       api
@@ -305,7 +259,11 @@ export default function QuestionnairePage() {
     setDiffs([]);
   }, [moduleId]);
 
-  // ── Difficultés venant du champ difficultes[] de la matière choisie ──
+  // FIX BUG 1 — Filtrer les modules selon la recherche de l'étudiant
+  const filteredModules = modules.filter((m) =>
+    m.nom_module.toLowerCase().includes(moduleSearch.toLowerCase())
+  );
+
   const selectedMatiere = matieres.find((m) => m._id === matiereId);
   const diffList = selectedMatiere?.difficultes || [];
 
@@ -321,7 +279,7 @@ export default function QuestionnairePage() {
     );
   }
 
-  // ── Soumission finale ──
+  // Soumission finale
   async function handleSubmit() {
     setLoading(true);
     setError("");
@@ -336,17 +294,12 @@ export default function QuestionnairePage() {
     ];
 
     try {
-      // 1. Mettre à jour filière + niveau dans le profil User
-      //    Le semestre n'est pas stocké dans User (il varie par questionnaire)
       const profileRes = await api.put("/auth/me", { filiereId, niveau });
-
-      // Mettre à jour le Context React (sidebar affichera les bonnes infos)
       updateUser({
         filiereId: profileRes.data.user.filiereId,
         niveau: profileRes.data.user.niveau,
       });
 
-      // 2. Créer la submission (semestre stocké ici, pas dans User)
       const submissionRes = await api.post("/submissions", {
         filiereId,
         moduleId,
@@ -357,13 +310,10 @@ export default function QuestionnairePage() {
         objectifs: objectifsFinal,
       });
 
-      // 3. Générer la recommandation via Groq
       await api.post("/recommendations/generate", {
         submissionId: submissionRes.data._id,
       });
 
-      // 4. Stocker le submissionId pour la redirection
-      //    La route dans App.jsx est /student/resultats/:id où :id = submissionId
       setSubmissionId(submissionRes.data._id);
       setSubmitted(true);
     } catch (err) {
@@ -388,14 +338,7 @@ export default function QuestionnairePage() {
             onClick={() => navigate("/student")}
             className='flex items-center gap-1.5 px-3 py-1.5 border border-[#e8e8e8] rounded-lg text-[12px] font-medium text-[#888] hover:border-[#bbb] hover:text-[#111] transition-colors'
           >
-            <svg
-              width='13'
-              height='13'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-            >
+            <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
               <polyline points='15 18 9 12 15 6' />
             </svg>
             Retour
@@ -404,82 +347,51 @@ export default function QuestionnairePage() {
       />
 
       <div className='flex-1 flex items-start justify-center p-10'>
-        {/* ── Toast erreur ── */}
+        {/* Toast erreur */}
         {error && (
           <div className='fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-red-50 border border-red-200 text-red-600 text-sm rounded-[10px] px-5 py-3 shadow-sm'>
             {error}
           </div>
         )}
 
-        {/* ── Écran succès ── */}
+        {/* Écran succès */}
         {submitted ? (
-          <Card
-            progress={progress}
-            submitted={submitted}
-          >
+          <Card progress={progress} submitted={submitted}>
             <div className='flex flex-col items-center text-center gap-4 py-6'>
               <div className='w-12 h-12 rounded-full bg-[#f0fdf4] border border-[#bbf7d0] flex items-center justify-center'>
-                <svg
-                  width='22'
-                  height='22'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='#22c55e'
-                  strokeWidth='2.5'
-                >
+                <svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='#22c55e' strokeWidth='2.5'>
                   <polyline points='20 6 9 17 4 12' />
                 </svg>
               </div>
               <div>
-                <h2 className='text-[16px] font-semibold mb-1.5'>
-                  Soumission envoyée !
-                </h2>
+                <h2 className='text-[16px] font-semibold mb-1.5'>Soumission envoyée !</h2>
                 <p className='text-[12px] text-[#888] leading-relaxed max-w-[300px] mx-auto'>
-                  OrientAI a analysé votre profil et généré votre plan
-                  d'apprentissage personnalisé.
+                  OrientAI a analysé votre profil et généré votre plan d'apprentissage personnalisé.
                 </p>
               </div>
-              {/* Redirection vers /student/resultats/:submissionId */}
               <button
                 onClick={() => navigate(`/student/resultats/${submissionId}`)}
                 className='flex items-center gap-2 px-5 py-2.5 bg-[#111] text-white text-[13px] font-medium rounded-lg hover:bg-[#333] transition-colors'
               >
                 Voir les résultats de l'analyse
-                <svg
-                  width='14'
-                  height='14'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='2'
-                >
+                <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
                   <polyline points='9 18 15 12 9 6' />
                 </svg>
               </button>
             </div>
           </Card>
         ) : loading ? (
-          /* ── Chargement Groq ── */
-          <Card
-            progress={progress}
-            submitted={submitted}
-          >
+          /* Chargement Groq */
+          <Card progress={progress} submitted={submitted}>
             <div className='flex flex-col items-center text-center gap-4 py-8'>
               <div className='w-10 h-10 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin' />
-              <p className='text-[13px] font-medium'>
-                OrientAI génère votre analyse…
-              </p>
-              <p className='text-[11px] text-[#888]'>
-                Cela prend quelques secondes
-              </p>
+              <p className='text-[13px] font-medium'>OrientAI génère votre analyse…</p>
+              <p className='text-[11px] text-[#888]'>Cela prend quelques secondes</p>
             </div>
           </Card>
         ) : step === 1 ? (
-          /* ── Étape 1 : Filière / Niveau / Semestre ── */
-          <Card
-            progress={progress}
-            submitted={submitted}
-          >
+          /* Étape 1 : Filière / Niveau / Semestre */
+          <Card progress={progress} submitted={submitted}>
             <StepHeader
               step={step}
               total={TOTAL}
@@ -487,7 +399,6 @@ export default function QuestionnairePage() {
               desc='Sélectionnez votre filière, niveau et semestre actuel.'
             />
             <div className='flex flex-col gap-3.5'>
-              {/* Filières chargées depuis l'API */}
               <SelectField
                 label='Filière'
                 value={filiereId}
@@ -526,24 +437,63 @@ export default function QuestionnairePage() {
             />
           </Card>
         ) : step === 2 ? (
-          /* ── Étape 2 : Module ── */
-          <Card
-            progress={progress}
-            submitted={submitted}
-          >
+          /* ── Étape 2 : Module — FIX BUG 1 : barre de recherche ajoutée ── */
+          <Card progress={progress} submitted={submitted}>
             <StepHeader
               step={step}
               total={TOTAL}
               title='Module concerné'
               desc='Choisissez le module dans lequel vous rencontrez des difficultés.'
             />
-            <div className='flex flex-col gap-2'>
+
+            {/* Barre de recherche — permet de filtrer les modules rapidement */}
+            {modules.length > 0 && (
+              <div className='flex items-center gap-2 border border-[#e8e8e8] rounded-[10px] px-3 py-[7px] focus-within:border-[#111] transition-colors mb-3'>
+                <svg className='w-3.5 h-3.5 text-[#888] shrink-0' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                  <circle cx='11' cy='11' r='8' />
+                  <line x1='21' y1='21' x2='16.65' y2='16.65' />
+                </svg>
+                <input
+                  type='text'
+                  value={moduleSearch}
+                  onChange={(e) => setModuleSearch(e.target.value)}
+                  placeholder='Rechercher un module…'
+                  className='outline-none border-none bg-transparent text-[13px] text-[#111] placeholder:text-[#888] w-full'
+                />
+                {/* Bouton reset si une recherche est active */}
+                {moduleSearch && (
+                  <button
+                    onClick={() => setModuleSearch("")}
+                    className='text-[#ccc] hover:text-[#888] transition-colors shrink-0'
+                  >
+                    <svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                      <line x1='18' y1='6' x2='6' y2='18' />
+                      <line x1='6' y1='6' x2='18' y2='18' />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Compteur de résultats si une recherche est active */}
+            {moduleSearch && (
+              <p className='text-[11px] text-[#888] mb-2'>
+                {filteredModules.length} résultat{filteredModules.length > 1 ? "s" : ""} pour "{moduleSearch}"
+              </p>
+            )}
+
+            <div className='flex flex-col gap-2 max-h-[280px] overflow-y-auto pr-1'>
               {modules.length === 0 ? (
                 <p className='text-[12px] text-[#888] text-center py-4'>
                   Aucun module trouvé pour cette filière et ce semestre.
                 </p>
+              ) : filteredModules.length === 0 ? (
+                /* Message si la recherche ne trouve rien */
+                <p className='text-[12px] text-[#888] text-center py-4'>
+                  Aucun module ne correspond à "{moduleSearch}".
+                </p>
               ) : (
-                modules.map((m) => (
+                filteredModules.map((m) => (
                   <ChoiceCard
                     key={m._id}
                     label={m.nom_module}
@@ -568,11 +518,8 @@ export default function QuestionnairePage() {
             />
           </Card>
         ) : step === 3 ? (
-          /* ── Étape 3 : Matière ── */
-          <Card
-            progress={progress}
-            submitted={submitted}
-          >
+          /* Étape 3 : Matière */
+          <Card progress={progress} submitted={submitted}>
             <StepHeader
               step={step}
               total={TOTAL}
@@ -608,11 +555,8 @@ export default function QuestionnairePage() {
             />
           </Card>
         ) : step === 4 ? (
-          /* ── Étape 4 : Difficultés ── */
-          <Card
-            progress={progress}
-            submitted={submitted}
-          >
+          /* Étape 4 : Difficultés */
+          <Card progress={progress} submitted={submitted}>
             <StepHeader
               step={step}
               total={TOTAL}
@@ -635,7 +579,6 @@ export default function QuestionnairePage() {
                 ))
               )}
             </div>
-            {/* Champ libre */}
             <div className='flex items-center gap-3 my-3'>
               <div className='flex-1 h-px bg-[#e8e8e8]' />
               <span className='text-[11px] text-[#888]'>autre</span>
@@ -643,8 +586,7 @@ export default function QuestionnairePage() {
             </div>
             <div className='flex flex-col gap-1.5'>
               <label className='text-[12px] font-semibold'>
-                Précisez{" "}
-                <span className='font-normal text-[#888]'>(optionnel)</span>
+                Précisez <span className='font-normal text-[#888]'>(optionnel)</span>
               </label>
               <textarea
                 value={diffLibre}
@@ -658,19 +600,15 @@ export default function QuestionnairePage() {
               onPrev={() => setStep(3)}
               onNext={() => {
                 const total = diffs.length + (diffLibre.trim() ? 1 : 0);
-                if (total === 0)
-                  return setError("Ajoutez au moins une difficulté");
+                if (total === 0) return setError("Ajoutez au moins une difficulté");
                 setError("");
                 setStep(5);
               }}
             />
           </Card>
         ) : (
-          /* ── Étape 5 : Objectifs ── */
-          <Card
-            progress={progress}
-            submitted={submitted}
-          >
+          /* Étape 5 : Objectifs */
+          <Card progress={progress} submitted={submitted}>
             <StepHeader
               step={step}
               total={TOTAL}
@@ -689,7 +627,6 @@ export default function QuestionnairePage() {
                 </button>
               ))}
             </div>
-            {/* Champ libre */}
             <div className='flex items-center gap-3 my-3'>
               <div className='flex-1 h-px bg-[#e8e8e8]' />
               <span className='text-[11px] text-[#888]'>ou</span>
@@ -697,8 +634,7 @@ export default function QuestionnairePage() {
             </div>
             <div className='flex flex-col gap-1.5'>
               <label className='text-[12px] font-semibold'>
-                Précisez{" "}
-                <span className='font-normal text-[#888]'>(optionnel)</span>
+                Précisez <span className='font-normal text-[#888]'>(optionnel)</span>
               </label>
               <input
                 type='text'
@@ -712,8 +648,7 @@ export default function QuestionnairePage() {
               onPrev={() => setStep(4)}
               onNext={() => {
                 const total = objectifs.length + (objLibre.trim() ? 1 : 0);
-                if (total === 0)
-                  return setError("Choisissez au moins un objectif");
+                if (total === 0) return setError("Choisissez au moins un objectif");
                 setError("");
                 handleSubmit();
               }}

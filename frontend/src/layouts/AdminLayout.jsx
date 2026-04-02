@@ -1,6 +1,27 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+// ─── Composant logo boussole OrientAI ────────────────────────────────────────
+// Remplace l'ancien badge vert "EMSI" par le symbole SVG de la boussole
+function CompassLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="72" fill="none" stroke="#22c55e" strokeWidth="2.5"/>
+      <circle cx="100" cy="100" r="56" fill="#22c55e" opacity="0.08"/>
+      <polygon points="100,40 88,100 100,88 112,100" fill="#22c55e"/>
+      <polygon points="100,160 88,100 100,112 112,100" fill="#22c55e" opacity="0.3"/>
+      <circle cx="100" cy="100" r="6" fill="#22c55e"/>
+      <line x1="100" y1="28" x2="100" y2="38" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="100" y1="162" x2="100" y2="172" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="172" y1="100" x2="162" y2="100" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="28" y1="100" x2="38" y2="100" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="136" cy="61" r="4.5" fill="#22c55e"/>
+      <circle cx="148" cy="73" r="2.5" fill="#22c55e" opacity="0.55"/>
+      <circle cx="142" cy="51" r="2.5" fill="#22c55e" opacity="0.35"/>
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
   {
     label: "Vue générale",
@@ -110,11 +131,9 @@ export default function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-white text-[#111] font-sans text-sm">
       <aside className="w-[220px] min-h-screen border-r border-[#e8e8e8] flex flex-col py-5 fixed inset-y-0 left-0 bg-white z-10">
-        {/* Logo */}
+        {/* Logo — boussole SVG + nom OrientAI */}
         <div className="flex items-center gap-2.5 px-4 pb-5 border-b border-[#e8e8e8]">
-          <div className="w-8 h-8 bg-[#22c55e] rounded-lg flex items-center justify-center text-[10px] font-bold text-white tracking-tight">
-            EMSI
-          </div>
+          <CompassLogo />
           <div>
             <strong className="block text-[13px] font-semibold">OrientAI</strong>
             <small className="text-[11px] text-[#888]">Administration</small>

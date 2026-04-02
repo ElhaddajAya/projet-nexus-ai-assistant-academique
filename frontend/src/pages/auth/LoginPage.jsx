@@ -46,10 +46,100 @@ export default function LoginPage() {
     <div className='min-h-screen bg-[#f9f9f9] flex items-center justify-center px-4'>
       <div className='w-full max-w-md bg-white border border-[#e8e8e8] rounded-[14px] p-8'>
         {/* Logo */}
-        <div className='flex justify-center mb-6'>
-          <div className='w-12 h-12 bg-[#22c55e] rounded-[10px] flex items-center justify-center'>
-            <span className='text-white font-bold text-lg'>EMSI</span>
-          </div>
+        <div className='flex justify-center'>
+          <svg
+            width='100'
+            height='100'
+            viewBox='0 0 200 200'
+            xmlns='http://www.w3.org/2000/svg'
+          >
+            <circle
+              cx='100'
+              cy='100'
+              r='72'
+              fill='none'
+              stroke='#22c55e'
+              strokeWidth='2.5'
+            />
+            <circle
+              cx='100'
+              cy='100'
+              r='56'
+              fill='#22c55e'
+              opacity='0.08'
+            />
+            <polygon
+              points='100,40 88,100 100,88 112,100'
+              fill='#22c55e'
+            />
+            <polygon
+              points='100,160 88,100 100,112 112,100'
+              fill='#22c55e'
+              opacity='0.3'
+            />
+            <circle
+              cx='100'
+              cy='100'
+              r='6'
+              fill='#22c55e'
+            />
+            <line
+              x1='100'
+              y1='28'
+              x2='100'
+              y2='38'
+              stroke='#22c55e'
+              strokeWidth='2'
+              strokeLinecap='round'
+            />
+            <line
+              x1='100'
+              y1='162'
+              x2='100'
+              y2='172'
+              stroke='#22c55e'
+              strokeWidth='2'
+              strokeLinecap='round'
+            />
+            <line
+              x1='172'
+              y1='100'
+              x2='162'
+              y2='100'
+              stroke='#22c55e'
+              strokeWidth='2'
+              strokeLinecap='round'
+            />
+            <line
+              x1='28'
+              y1='100'
+              x2='38'
+              y2='100'
+              stroke='#22c55e'
+              strokeWidth='2'
+              strokeLinecap='round'
+            />
+            <circle
+              cx='136'
+              cy='61'
+              r='4.5'
+              fill='#22c55e'
+            />
+            <circle
+              cx='148'
+              cy='73'
+              r='2.5'
+              fill='#22c55e'
+              opacity='0.55'
+            />
+            <circle
+              cx='142'
+              cy='51'
+              r='2.5'
+              fill='#22c55e'
+              opacity='0.35'
+            />
+          </svg>
         </div>
 
         <h1 className='text-[#111] text-2xl font-bold text-center mb-1'>

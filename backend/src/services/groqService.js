@@ -56,7 +56,8 @@ const generateRecommendation = async ({
     "ressources_recommandees" : Analyse les difficultés déclarées par l'étudiant et sélectionne
       UNIQUEMENT les ressources de la liste ci-dessus qui adressent DIRECTEMENT ces difficultés.
       Si une ressource ne correspond à aucune difficulté déclarée, ne l'inclus PAS.
-      Maximum 3 ressources. Ne génère JAMAIS de ressources inventées ou non présentes dans la liste.
+      Il n'ya pas de nombre minimum ou maximum de ressources à recommander — recommande seulement celles qui sont pertinentes.
+      Ne génère JAMAIS de ressources inventées ou non présentes dans la liste.
 
     {
       "analyse": "4 à 6 phrases structurées couvrant niveau, difficultés, points forts et recommandation",
@@ -103,9 +104,12 @@ const generateRecommendation = async ({
       ]
     }
 
-    Pour note_progression : entier entre 0 et 100 basé sur les difficultés déclarées.
-    Peu de difficultés fondamentales = note haute, beaucoup = note basse.
-    Exemples : débutant complet = 10-25, bases acquises = 30-50, intermédiaire = 55-75, avancé = 80-95.`;
+  Pour note_progression : OBLIGATOIRE — calcule un entier entre 0 et 100 strictement basé sur le nombre et la gravité des difficultés déclarées par l'étudiant.
+  RÈGLE STRICTE : si l'étudiant a coché TOUTES les difficultés ou la majorité = score entre 5 et 25.
+  Si l'étudiant a coché la moitié = score entre 30 et 50.
+  Si l'étudiant a coché peu de difficultés = score entre 60 et 80.
+  Si l'étudiant n'a presque aucune difficulté = score entre 85 et 95.
+  Ne jamais retourner 55 par défaut. Toujours adapter au profil réel.`;
 
   const response = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",

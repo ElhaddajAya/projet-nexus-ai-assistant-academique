@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import StudentTopbar from "../../components/student/StudentTopbar";
 import Pagination, { usePagination } from "../../components/Pagination";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 
 const TYPE_STYLE = {
@@ -13,6 +14,9 @@ const TYPE_STYLE = {
 const TYPE_FILTERS = ["Tout", "Document", "Vidéo", "TP / TD", "Site web"];
 
 export default function RessourcesStudentPage() {
+  // FIX BUG 2 — Récupérer l'étudiant connecté pour filtrer par sa filière
+  const { user } = useAuth();
+
   const [ressources, setRessources]       = useState([]);
   const [matieres, setMatieres]           = useState([]);
   const [search, setSearch]               = useState("");
@@ -21,9 +25,21 @@ export default function RessourcesStudentPage() {
   const [loading, setLoading]             = useState(true);
 
   useEffect(() => {
-    // Charger ressources + matières en parallèle
+    // FIX BUG 2 — Récupérer le filiereId de l'étudiant connecté
+    // Si l'étudiant a une filière enregistrée dans son profil, on filtre par elle
+    // Sinon on charge tout (cas où l'étudiant n'a pas encore fait de questionnaire)
+    const studentFiliereId = user?.filiereId
+      ? (typeof user.filiereId === "object" ? user.filiereId._id : user.filiereId)
+      : null;
+
+    // Construire l'URL avec le filtre filiereId si disponible
+    // L'API /ressources supporte déjà ?filiereId= mais elle n'était pas utilisée ici
+    const ressourcesUrl = studentFiliereId
+      ? `/ressources?filiereId=${studentFiliereId}`
+      : "/ressources";
+
     Promise.all([
-      api.get("/ressources"),
+      api.get(ressourcesUrl),
       api.get("/matieres"),
     ])
       .then(([resR, resM]) => {
@@ -32,15 +48,15 @@ export default function RessourcesStudentPage() {
       })
       .catch((err) => console.error("Erreur chargement :", err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user?.filiereId]);
 
   // Filtrage combiné : search + type + matière
+  // Note : le filtre filière est déjà appliqué au niveau de l'API (voir useEffect)
   const filtered = ressources.filter((r) => {
     const t = TYPE_STYLE[r.type] || {};
     const matchSearch  = r.titre.toLowerCase().includes(search.toLowerCase()) ||
                          (r.description || "").toLowerCase().includes(search.toLowerCase());
     const matchType    = filterType === "Tout" || t.label === filterType;
-    // matiereId peut être un string ou un objet selon le populate
     const rMatiereId   = typeof r.matiereId === "object" ? r.matiereId?._id : r.matiereId;
     const matchMatiere = filterMatiere === "Toutes" || rMatiereId === filterMatiere;
     return matchSearch && matchType && matchMatiere;
@@ -49,6 +65,8 @@ export default function RessourcesStudentPage() {
   // Pagination — 12 cartes par page, reset quand un filtre change
   const { page, setPage, paginated, totalPages } = usePagination(filtered, 12);
   useEffect(() => { setPage(1); }, [search, filterType, filterMatiere]);
+
+  // Garder seulement les matières qui ont au moins une ressource dans la liste filtrée
   const matieresAvecRessources = matieres.filter((m) =>
     ressources.some((r) => {
       const rMatiereId = typeof r.matiereId === "object" ? r.matiereId?._id : r.matiereId;
@@ -56,15 +74,34 @@ export default function RessourcesStudentPage() {
     })
   );
 
+  // Récupérer le nom de la filière pour l'afficher dans le message si pas de filière
+  const hasFiliere = !!user?.filiereId;
+
   return (
     <>
       <StudentTopbar
         title="Ressources"
-        subtitle="Toutes les ressources pédagogiques disponibles"
+        subtitle={
+          hasFiliere
+            ? "Ressources pédagogiques de votre filière"
+            : "Toutes les ressources pédagogiques disponibles"
+        }
       />
       <div className="p-7 flex flex-col gap-5">
 
-        {/* ── Barre search + filtre type ── */}
+        {/* FIX BUG 2 — Message info si l'étudiant n'a pas encore de filière enregistrée */}
+        {!hasFiliere && (
+          <div className="flex items-center gap-2.5 bg-amber-50 border border-amber-200 text-amber-700 text-[12px] rounded-[10px] px-4 py-3">
+            <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='shrink-0'>
+              <circle cx='12' cy='12' r='10' />
+              <line x1='12' y1='8' x2='12' y2='12' />
+              <line x1='12' y1='16' x2='12.01' y2='16' />
+            </svg>
+            Vous n'avez pas encore de filière enregistrée. Faites un questionnaire pour voir uniquement les ressources de votre filière.
+          </div>
+        )}
+
+        {/* Barre search + filtre type */}
         <div className="flex items-center gap-3 flex-wrap">
           {/* Recherche */}
           <div className="flex items-center gap-2 border border-[#e8e8e8] rounded-[10px] px-3 py-[7px] focus-within:border-[#111] transition-colors">
@@ -104,7 +141,7 @@ export default function RessourcesStudentPage() {
           </span>
         </div>
 
-        {/* ── Filtre par matière ── */}
+        {/* Filtre par matière */}
         <div className="flex items-center gap-2">
           <span className="text-[12px] font-semibold text-[#888]">Matière :</span>
           <select
@@ -125,7 +162,6 @@ export default function RessourcesStudentPage() {
             ))}
           </select>
 
-          {/* Bouton reset — visible seulement si une matière est sélectionnée */}
           {filterMatiere !== "Toutes" && (
             <button
               onClick={() => setFilterMatiere("Toutes")}
@@ -136,7 +172,7 @@ export default function RessourcesStudentPage() {
           )}
         </div>
 
-        {/* ── Contenu ── */}
+        {/* Contenu */}
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="w-8 h-8 border-2 border-[#e8e8e8] border-t-[#111] rounded-full animate-spin" />
@@ -188,7 +224,7 @@ export default function RessourcesStudentPage() {
           </div>
         )}
 
-        {/* ── Pagination ── */}
+        {/* Pagination */}
         {!loading && filtered.length > 0 && (
           <div className="border border-[#e8e8e8] rounded-xl overflow-hidden">
             <Pagination page={page} total={totalPages} onChange={setPage} />

@@ -47,8 +47,6 @@ projet-nexus-ai/
 │       ├── models/
 │       ├── routes/
 │       └── services/
-├── seed.js
-├── seed_4a.js
 └── README.md
 ```
 
@@ -107,28 +105,6 @@ L'application démarre sur `http://localhost:5173`.
 
 ---
 
-## Population de la base de données
-
-Avant la première utilisation, il faut insérer les données de démonstration (filières, modules, matières, ressources).
-
-Depuis la racine du backend :
-
-```bash
-# Données 1ère et 2ème année IIR
-node seed.js
-
-# Données 4ème année IIR — Semestre 1
-node seed_4a.js
-```
-
-Ces scripts créent automatiquement :
-- 1 filière : **IIR** (Ingénierie Informatique et Réseaux)
-- 17 modules répartis sur 1A S1, 1A S2, 2A S1, 2A S2, 4A S1
-- 27 matières avec leurs difficultés configurées
-- 188 ressources pédagogiques (cours, TDs, TPs, examens) avec liens Google Drive
-
----
-
 ## Créer un compte administrateur
 
 L'application ne fournit pas d'interface de création admin. Pour créer un compte admin, envoyer une requête POST :
@@ -171,4 +147,4 @@ Projet réalisé par une équipe de 4 étudiantes en 4ème année Ingénierie In
 | Fatima | Authentification |
 | Malak | Interface Administration |
 | Imane | Ressources étudiants & Soumissions admin |
-| Ayaa | Questionnaire, Résultats IA, Chat, Profil |
+| Aya | Questionnaire, Résultats IA, Chat, Profil |

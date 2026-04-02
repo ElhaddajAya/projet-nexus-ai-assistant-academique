@@ -116,7 +116,7 @@ export default function StudentDashboardPage() {
               </h2>
               <span className='flex items-center gap-1 text-[10px] font-semibold text-[#22c55e] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-full'>
                 <span className='w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse inline-block' />
-                Groq AI actif
+                IA actif
               </span>
             </div>
             <p className='text-[12px] text-[#888] max-w-md'>

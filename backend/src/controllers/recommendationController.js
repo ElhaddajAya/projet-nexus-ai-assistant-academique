@@ -41,7 +41,7 @@ const generate = async (req, res) =>
     // sans appeler Groq —> réduit le coût API et la charge serveur
     const difficultesSorted = [...submission.difficultes].sort();
 
-    // Chercher toutes les recommendations de cet utilisateur pour cette matière
+    // Chercher toutes les recommendations de cet utilisateur pour cette matière dans la base de données
     const existingRecos = await Recommendation.find({ userId }).populate({
       path: "submissionId",
       select: "matiereId difficultes",

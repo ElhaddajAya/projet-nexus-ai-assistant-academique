@@ -24,6 +24,9 @@ const generateRecommendation = async ({
     Tu ne mets JAMAIS de balises markdown comme \`\`\`json.
     Ta réponse doit commencer par { et finir par }.`;
 
+  // Calcul du ratio de difficultés pour guider Groq
+  const nbDifficultes = difficultes.length;
+
   // User prompt — profil complet + structure JSON avec analyse enrichie
   const userPrompt = `Voici le profil complet de l'étudiant :
     - Filière  : ${filiere}
@@ -32,10 +35,21 @@ const generateRecommendation = async ({
     - Semestre : ${semestre}
     - Niveau   : ${niveau || "non précisé"}
     - Difficultés déclarées : ${difficultes.join(", ")}
+    - Nombre de difficultés déclarées : ${nbDifficultes}
     - Objectifs visés : ${objectifs.join(", ")}
 
     Ressources pédagogiques disponibles pour cette matière :
     ${ressourcesText}
+
+    RÈGLE OBLIGATOIRE — Calcule note_progression AVANT de générer le JSON :
+    Tu dois estimer le niveau de maîtrise de l'étudiant basé sur ses difficultés déclarées.
+    - L'étudiant a déclaré ${nbDifficultes} difficulté(s).
+    - Si ${nbDifficultes} >= 6 difficultés (beaucoup) → note entre 5 et 20.
+    - Si ${nbDifficultes} entre 4 et 5 difficultés (majorité) → note entre 21 et 35.
+    - Si ${nbDifficultes} entre 2 et 3 difficultés (quelques-unes) → note entre 36 et 60.
+    - Si ${nbDifficultes} == 1 difficulté (très peu) → note entre 61 et 80.
+    - Si ${nbDifficultes} == 0 difficulté → note entre 81 et 95.
+    INTERDIT : Ne retourne JAMAIS 40, 50 ou 55 comme valeur par défaut. Calcule vraiment selon les règles ci-dessus.
 
     Génère une réponse avec EXACTEMENT cette structure JSON.
 
@@ -50,18 +64,21 @@ const generateRecommendation = async ({
     "plan_travail" : 4 étapes concrètes et progressives, chacune avec un titre clair,
       une durée réaliste et une description détaillée et actionnable (2-3 phrases minimum).
 
+    "ressources_recommandees" : Sélectionne TOUTES les ressources de la liste disponible
+      qui sont utiles pour les difficultés déclarées — pas seulement les plus évidentes.
+      RÈGLE STRICTE : si tu mentionnes une ressource dans le plan_travail, elle DOIT
+      obligatoirement apparaître dans ressources_recommandees.
+      Ne génère JAMAIS de ressources inventées ou absentes de la liste disponible.
+      L'objectif est de donner le MAXIMUM de ressources UTILES et qui correspondent aux difficultés declarées — pas le minimum.
+
     "conseils_ia" : 4 à 5 conseils pratiques, spécifiques aux difficultés déclarées,
       chaque conseil doit être directement applicable et pas générique.
 
-    "ressources_recommandees" : Analyse les difficultés déclarées par l'étudiant et sélectionne
-      UNIQUEMENT les ressources de la liste ci-dessus qui adressent DIRECTEMENT ces difficultés.
-      Si une ressource ne correspond à aucune difficulté déclarée, ne l'inclus PAS.
-      Il n'ya pas de nombre minimum ou maximum de ressources à recommander — recommande seulement celles qui sont pertinentes.
-      Ne génère JAMAIS de ressources inventées ou non présentes dans la liste.
+
 
     {
       "analyse": "4 à 6 phrases structurées couvrant niveau, difficultés, points forts et recommandation",
-      "note_progression": 55,
+      "note_progression": "<entier calculé selon les règles ci-dessus — JAMAIS 40, 50 ou 55>",
       "plan_travail": [
         {
           "step": 1,
@@ -102,14 +119,7 @@ const generateRecommendation = async ({
           "type": "ex : document, video, TP/TD, site web"
         }
       ]
-    }
-
-  Pour note_progression : OBLIGATOIRE — calcule un entier entre 0 et 100 strictement basé sur le nombre et la gravité des difficultés déclarées par l'étudiant.
-  RÈGLE STRICTE : si l'étudiant a coché TOUTES les difficultés ou la majorité = score entre 5 et 25.
-  Si l'étudiant a coché la moitié = score entre 30 et 50.
-  Si l'étudiant a coché peu de difficultés = score entre 60 et 80.
-  Si l'étudiant n'a presque aucune difficulté = score entre 85 et 95.
-  Ne jamais retourner 55 par défaut. Toujours adapter au profil réel.`;
+    }`;
 
   const response = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",

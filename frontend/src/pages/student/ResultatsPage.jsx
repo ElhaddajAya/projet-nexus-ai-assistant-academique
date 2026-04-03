@@ -567,7 +567,7 @@ export function ResultatDetailPage() {
           </div>
 
           {messages.length > 0 && (
-            <div className='p-4 flex flex-col gap-3 max-h-[300px] overflow-y-auto'>
+            <div className='p-4 flex flex-col gap-3 max-h-[450px] overflow-y-auto'>
               {messages.map((m, i) => (
                 <div
                   key={i}
